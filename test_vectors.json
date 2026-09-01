@@ -1,0 +1,134 @@
+{
+  "_license": "CC0-1.0",
+  "_description": "Test vectors for the Output Public Key Exposure Classification BIP.",
+  "script_vectors": [
+    {
+      "script_pubkey": "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac",
+      "template": "P2PK",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "script_pubkey": "2102f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9ac",
+      "template": "P2PK",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
+      "template": "P2PKH",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "script_pubkey": "51210222222222222222222222222222222222222222222222222222222222222222222103333333333333333333333333333333333333333333333333333333333333333352ae",
+      "template": "P2MS-1of2",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "script_pubkey": "a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba87",
+      "template": "P2SH",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "script_pubkey": "001489abcdefabbaabbaabbaabbaabbaabbaabbaabba",
+      "template": "P2WPKH",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "script_pubkey": "00201111111111111111111111111111111111111111111111111111111111111111",
+      "template": "P2WSH",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "script_pubkey": "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+      "template": "P2TR",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
+      "template": "P2MR",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "NOT_EXPOSED"
+    },
+    {
+      "script_pubkey": "5210751e76e8199196d454941c45d1b3a323",
+      "template": "witness-v2-16B",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "UNDETERMINED"
+    },
+    {
+      "script_pubkey": "60285fbf4c95ba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1c",
+      "template": "witness-v16-40B",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "UNDETERMINED"
+    }
+  ],
+  "history_vectors": [
+    {
+      "description": "P2PKH, spent from, balance remains",
+      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
+      "spent_output_count": 3,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "description": "P2WSH, spent from, balance remains",
+      "script_pubkey": "00201111111111111111111111111111111111111111111111111111111111111111",
+      "spent_output_count": 1,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "description": "P2PKH, no spend, history truncated",
+      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
+      "spent_output_count": 0,
+      "history_complete": false,
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "description": "P2PKH, no spend, complete history",
+      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "description": "P2TR, no transactions at all",
+      "script_pubkey": "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "description": "P2MR, unspent",
+      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
+      "spent_output_count": 0,
+      "history_complete": true,
+      "expected": "NOT_EXPOSED"
+    },
+    {
+      "description": "P2PKH, no aggregate stats and incomplete history",
+      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
+      "spent_output_count": null,
+      "history_complete": false,
+      "expected": "UNDETERMINED"
+    }
+  ]
+}
