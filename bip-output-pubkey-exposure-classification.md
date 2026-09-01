@@ -7,7 +7,7 @@
   Type: Specification
   Assigned: ?
   License: BSD-2-Clause OR CC0-1.0
-  Version: 0.1.0
+  Version: 0.2.0
   Requires: 360
 ```
 
@@ -145,8 +145,10 @@ Consequences that follow from this rule:
 ### Classification by Output Type
 
 The following table gives the level of an output that has *not* been disclosed by any earlier
-transaction. The derived condition of `EXPOSED_AT_REST` overrides every row: an output whose
-spending key set has been published elsewhere is `EXPOSED_AT_REST` regardless of its type.
+transaction. The derived condition of `EXPOSED_AT_REST` overrides every row: an output for which
+*everything required to construct a valid spend* — sufficient keys, and for script-committing
+types the script itself — has been published elsewhere is `EXPOSED_AT_REST` regardless of its
+type.
 
 | Output type | On-chain commitment | Level absent prior disclosure |
 | --- | --- | --- |
@@ -182,6 +184,15 @@ that was executed, and any keys in it. Those keys become disclosed, and any *oth
 spending key set they satisfy is thereby `EXPOSED_AT_REST` by the derived condition. The
 `NOT_EXPOSED` level is a property of the unspent output, not a permanent property of its keys.
 
+Note that publication of a leaf key alone does not make a P2MR output disclosed: spending a P2MR
+output additionally requires the leaf script and its Merkle path, neither of which is observable
+from the output. The derived condition applies to a P2MR output only when a complete spend
+recipe has been published — in practice, when an output committing to the *same* script tree was
+previously spent through a leaf whose keys are disclosed. An implementation cannot observe the
+leaves of a never-spent tree, so a classifier restricted to chain data will report such an
+output `NOT_EXPOSED`; this is the intended reading of the levels as statements about what the
+chain shows (see [Out-of-Band Disclosure](#out-of-band-disclosure)).
+
 ### Classification Under Partial History
 
 An implementation that cannot retrieve the complete transaction history of a script — because of
@@ -193,16 +204,26 @@ inference is sound and requires no history traversal:
 
 > If the script has a confirmed spent-output count greater than zero, at least one spend has
 > occurred. For every type in the table above other than P2MR and `UNDETERMINED`, a spend
-> publishes key material. The script is therefore disclosed, and all of its outputs are
-> `EXPOSED_AT_REST` by the derived condition.
+> publishes the material committed to by the script — the key for key-committing types, the full
+> script (and any keys it contains) for script-committing types. The script is therefore
+> disclosed, and all of its outputs are `EXPOSED_AT_REST` by the derived condition.
 
-This yields a correct classification in constant time from an aggregate counter, and remains
-correct when history retrieval is truncated. Implementations SHOULD use it as a floor: retrieved
-transactions then serve to identify *which* keys were disclosed and *when*, refining the evidence
-without being able to weaken the level.
+For a script-hash output whose revealed script requires no signature, this floor over-approximates
+— no key material was actually published. The error is in the conservative direction, which the
+fail-closed rule permits; an implementation that retrieves the revealing transaction SHOULD
+refine the level from the actual script content.
 
-Where neither complete history nor aggregate statistics are available, the implementation MUST
-report `UNDETERMINED` rather than a level derived from an admittedly incomplete view.
+This yields a classification in constant time from an aggregate counter, and remains correct as a
+lower bound when history retrieval is truncated. Implementations SHOULD use it as a floor:
+retrieved transactions then serve to identify *which* keys were disclosed and *when*, refining
+the evidence without being able to weaken the level.
+
+The rules above apply to outputs whose classification depends on spend history — those that would
+otherwise be `EXPOSED_ON_SPEND`. Structural assignment needs no history at all: a P2PK or P2TR
+output is `EXPOSED_AT_REST` from its `scriptPubKey` alone, and an unrecognized type is
+`UNDETERMINED` regardless of what history shows. Where a history-dependent classification is
+required but neither complete history nor aggregate statistics are available, the implementation
+MUST report `UNDETERMINED` rather than a level derived from an admittedly incomplete view.
 
 ### Indexer Blind Spots
 
@@ -211,9 +232,9 @@ and bare P2MS outputs encode no address, and such indexers frequently omit them 
 of the corresponding P2PKH address, even where the same key controls both.
 
 An implementation relying on an address-indexed data source therefore cannot observe P2PK
-disclosure for a key it is examining, and may report `EXPOSED_ON_SPEND` or `NOT_EXPOSED` for a key
-whose full public key has been on-chain since 2009. Implementations SHOULD additionally query by
-script hash where the data source permits, and MUST document this limitation where it does not.
+disclosure for a key it is examining, and may report `EXPOSED_ON_SPEND` for a key whose full
+public key has been on-chain since 2009. Implementations SHOULD additionally query by script
+hash where the data source permits, and MUST document this limitation where it does not.
 
 ### Out-of-Band Disclosure
 
@@ -301,7 +322,7 @@ History-dependent vectors, which require chain state rather than a script alone:
 | P2PKH script, no confirmed spend, complete history available | `EXPOSED_ON_SPEND` |
 | P2TR script, no transactions at all | `EXPOSED_AT_REST` |
 | P2MR script, script-path spend occurred, revealed leaf key reused elsewhere | revealed key's other outputs become `EXPOSED_AT_REST` |
-| Any script, aggregate statistics unavailable and history incomplete | `UNDETERMINED` |
+| Hash-committed script (e.g. P2PKH), aggregate statistics unavailable, history incomplete | `UNDETERMINED` |
 
 ## Rationale
 
@@ -370,6 +391,12 @@ history-dependent — when run directly. The vectors are additionally published 
 
 ## Changelog
 
+* 0.2.0 — Clarified that the derived condition requires a complete spend recipe, and how it
+  applies (and does not apply) to P2MR outputs; scoped the partial-history `UNDETERMINED` rule to
+  history-dependent classifications, since structural assignment needs no history; noted that the
+  aggregate-counter floor over-approximates for revealed scripts requiring no signature, and that
+  the error is in the conservative direction; removed an impossible `NOT_EXPOSED` mention from
+  the indexer blind-spot discussion.
 * 0.1.0 — Initial draft.
 
 ## Copyright
