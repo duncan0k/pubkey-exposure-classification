@@ -7,7 +7,9 @@
   Type: Specification
   Assigned: ?
   License: BSD-2-Clause OR CC0-1.0
-  Version: 0.2.0
+  Discussion: 2026-09-03: https://delvingbitcoin.org/t/standardizing-an-exposure-classification-for-existing-outputs-pre-bip/2866
+              2026-09-04: https://gnusha.org/pi/bitcoindev/010001a06dd4cdd9-b8082042-8750-4e9a-917e-2053c919e4c4-000000@email.amazonses.com/
+  Version: 0.3.0
   Requires: 360
 ```
 
@@ -106,6 +108,10 @@ has no offline attack. The exposure window opens when a spending transaction is 
 closes when it is confirmed and buried; within that window, an adversary capable of deriving the
 key faster than the transaction confirms may replace it.
 
+Note that this level describes an output that is *safe at rest*: the holder still knows something
+the adversary does not. The name has been read as "already exposed" by at least one reviewer;
+`EXPOSED_WHEN_SPENT` is under consideration as a clearer label (see Rationale).
+
 #### `NOT_EXPOSED`
 
 The output is not disclosed, and spending it does not publish key material capable of spending
@@ -171,6 +177,20 @@ of `Q` obtains a private key that satisfies key-path verification directly. Cons
 check how `Q` was constructed, so committing to a provably-unspendable internal key (a NUMS point)
 does not prevent this: the output remains spendable by anyone who can solve for `Q`. Removing this
 property is precisely the design goal of BIP 360.
+
+This classification answers one question: *can an adversary spend the output under current
+consensus rules?* A related but distinct question is whether the holder retains a secret the
+adversary lacks — for a BIP 341-conformant P2TR output, the internal key `P` and the script tree
+are such a secret, since `Q` alone does not reveal them. That secret is irrelevant to the
+attacker's ability to spend today, but it could underpin a future recovery mechanism that
+accepts proof of knowledge of `P` as evidence of legitimate ownership. The two questions have
+different answers for P2TR, and both are useful; this document deliberately scopes itself to the
+first because it is observable from chain data alone. Whether a given `Q` was produced by tweaking
+an internal key, or is a bare untweaked public key placed in a v1 output by a non-conformant
+implementation, cannot be determined on-chain — which is exactly why rescue-provability cannot be
+the basis of a deterministic classification, and why any recovery mechanism built on it would
+fail an unknown fraction of P2TR outputs. Implementations MAY report holder-retained secrets as a
+separate attribute; they MUST NOT let it lower the exposure level.
 
 **P2SH and P2WSH are `EXPOSED_ON_SPEND`, not `NOT_EXPOSED`.** The script is unknown before it is
 revealed, so no claim can be made about its key material — but every spend reveals the script in
@@ -340,6 +360,22 @@ cases the key is on-chain and the coins can be taken without warning. Separating
 reading that reused addresses are safer than P2PK, which is false. Implementations that wish to
 report the mechanism SHOULD do so as an additional attribute, not by weakening the level.
 
+**On the name `EXPOSED_ON_SPEND`.** Review of the initial draft showed that this label can be
+read as "already exposed by a spend" — the opposite of its meaning, which is "not exposed until
+spent". The semantics are not in question; the label is. `EXPOSED_WHEN_SPENT` is the leading
+alternative, and a rename before this document reaches Complete would be cheap. It has not been
+applied yet so that the name stays stable while the point is discussed; implementations
+tracking this draft should treat the two spellings as synonyms until the question is settled.
+
+**Why attacker-spendability, not holder-provability.** A reviewer observed that a P2TR holder
+retains a secret — the internal key — that a CRQC solving `Q` never learns, and asked whether
+that makes P2TR unexposed. It does not change what the adversary can do, so it does not change
+the level; but it is a real property with real uses, and the P2TR discussion above now names
+both questions. The reason the classification is built on the first is observability: whether a
+`Q` was tweaked from an internal key cannot be determined from the chain, so a classification
+that depended on it could not be deterministic. Exposure is a statement about the adversary;
+provability is a statement about the holder, and belongs in a rescue-protocol specification.
+
 **Why no scoring.** Converting exposure into a numeric risk score requires weighing balance,
 dormancy, owner sophistication, and assumptions about CRQC timelines — all of which are contested
 and none of which are observable on-chain. Standardizing the observable while leaving the weighing
@@ -391,6 +427,12 @@ history-dependent — when run directly. The vectors are additionally published 
 
 ## Changelog
 
+* 0.3.0 — Distinguished attacker-spendability (the basis of this classification) from
+  holder-provability (a holder-retained secret such as a P2TR internal key), with a note in the
+  P2TR discussion and a Rationale entry on why only the former can be classified deterministically
+  from chain data; recorded that `EXPOSED_ON_SPEND` has been misread as "already exposed" and
+  that `EXPOSED_WHEN_SPENT` is under consideration; added the Discussion header. Both technical
+  points arose from review by conduition on the mailing list.
 * 0.2.0 — Clarified that the derived condition requires a complete spend recipe, and how it
   applies (and does not apply) to P2MR outputs; scoped the partial-history `UNDETERMINED` rule to
   history-dependent classifications, since structural assignment needs no history; noted that the

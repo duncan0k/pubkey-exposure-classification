@@ -24,6 +24,9 @@ class Level(str, Enum):
     """
 
     EXPOSED_AT_REST = "EXPOSED_AT_REST"
+    #: Safe at rest; key material is published only when spent. Read carefully:
+    #: this is NOT "already exposed". EXPOSED_WHEN_SPENT is under consideration
+    #: as a clearer name (see the draft's Rationale); treat both as synonyms.
     EXPOSED_ON_SPEND = "EXPOSED_ON_SPEND"
     UNDETERMINED = "UNDETERMINED"
     NOT_EXPOSED = "NOT_EXPOSED"
