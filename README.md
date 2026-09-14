@@ -28,12 +28,15 @@ from P2PK, and what to report for a script whose contents have never been reveal
 
 ## Levels
 
-| Level | Meaning |
-| --- | --- |
-| `EXPOSED_AT_REST` | The key is on-chain. An adversary can derive it offline and spend at will. |
-| `EXPOSED_ON_SPEND` | The key is not on-chain, but spending will publish it. |
-| `NOT_EXPOSED` | The key is not on-chain, and spending does not publish a key usable elsewhere. |
-| `UNDETERMINED` | Script semantics unrecognized; no sound statement can be made. |
+| Level | Meaning | Action key (Appendix A) |
+| --- | --- | --- |
+| `EXPOSED_AT_REST` | The key is on-chain. An adversary can derive it offline and spend at will. | `MIGRATE` |
+| `EXPOSED_ON_SPEND` | The key is not on-chain, but spending will publish it. | `SWEEP_WHEN_SPENDING` |
+| `NOT_EXPOSED` | The key is not on-chain, and spending does not publish a key usable elsewhere. | `NONE` |
+| `UNDETERMINED` | Script semantics unrecognized; no sound statement can be made. | `TREAT_AS_MIGRATE` |
+
+The action keys are an informative floor requested by wallet developers: wallets own the wording,
+reasons and urgency, but should not contradict the substance.
 
 Two rules distinguish this from an ad-hoc taxonomy:
 

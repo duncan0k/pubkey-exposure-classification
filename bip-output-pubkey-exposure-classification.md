@@ -9,53 +9,67 @@
   License: BSD-2-Clause OR CC0-1.0
   Discussion: 2026-09-03: https://delvingbitcoin.org/t/standardizing-an-exposure-classification-for-existing-outputs-pre-bip/2866
               2026-09-04: https://gnusha.org/pi/bitcoindev/010001a06dd4cdd9-b8082042-8750-4e9a-917e-2053c919e4c4-000000@email.amazonses.com/
-  Version: 0.3.0
+  Version: 0.4.0
   Requires: 360
 ```
 
 ## Abstract
 
-This document specifies a deterministic, conservative classification that assigns every Bitcoin
-output an *exposure level* describing whether the public key material required to spend it has
-already been published on-chain.
+This document defines four exposure levels for Bitcoin outputs. The level answers one
+question: how much would an attacker holding a cryptographically relevant quantum computer
+have to do to take the coins? For one level the answer is nothing but wait. For another,
+win a race against a single transaction. For another, the attack does not apply. For the
+last, nobody can say yet.
 
-The classification depends only on data available from the block chain, is independent of any
-wallet, indexer, or risk-scoring methodology, and is defined so that two independent
-implementations observing the same chain state MUST produce the same result. It also defines
-what an implementation MUST NOT infer, so that unknown or unobservable conditions can never be
-reported as safe.
+The levels are derived only from what the block chain shows, so two implementations
+looking at the same chain state must reach the same answer. An implementation that cannot
+tell must say so rather than report the output as safe.
 
 ## Motivation
 
-Two proposals now describe how Bitcoin may respond to a cryptographically relevant quantum
-computer (CRQC): [BIP 360](bip-0360.mediawiki) defines an output type whose public key never
-appears on-chain until it is spent, and BIP 361 proposes a phased migration that eventually
-disables ECDSA and Schnorr verification for legacy outputs.
+I maintain a tool that classifies mainnet addresses by exposure. For its first month in
+production it labelled an address that had been spent from, and still held coins, as
+"exposed on spend". That label was wrong. The public key had been on the chain since the
+first spend, and an attacker does not need to wait for the next one. The address was in
+the same position as a P2PK output, and the tool was telling users it was safer. Fixing
+that made me look at how other tools and published figures define exposure, and they do
+not agree with each other.
 
-Both presuppose a capability that no BIP currently specifies: the ability to determine *which
-existing outputs are exposed*. That gap is already producing observable harm.
+Published estimates of the exposed supply run from about 25% to over 34%. That spread is
+not measurement noise. It comes from definitional choices that are usually not stated:
 
-**Published figures disagree because the definitions disagree.** Widely cited estimates of the
-exposed supply range from roughly 25% to over 34%. The spread is not measurement error; it
-follows from unstated definitional choices. Recurring points of divergence include:
+- A reused address that has been spent from and still holds a balance. Some tools treat it
+  as exposed only when it is next spent. To the attacker it is exposed now.
+- A P2TR output. Its 32-byte output key is a public key. Some tools count it as protected
+  because the internal key is hidden; the attacker does not need the internal key.
+- A P2SH or P2WSH output whose script has never been revealed. Nothing about its keys can
+  be observed, and tools differ on what to report.
+- Keys disclosed off-chain, through an xpub given to a service or a spend of the same
+  output on a fork. Some counts include these; the chain cannot see them.
 
-* whether a P2TR output is exposed at rest, given that its 32-byte output key *is* a public key;
-* whether an address that has been spent from, and still holds a balance, is treated as exposed
-  at rest or only on spend;
-* whether a P2SH or P2WSH output whose script has never been revealed can be classified at all;
-* whether keys disclosed off-chain — via xpub sharing, or via spends of the corresponding output
-  on a fork of the chain — fall within scope.
+One rule runs through everything that follows: when the data cannot distinguish two
+levels, the classifier reports the more exposed one. A tool that under-reports hands
+someone a false all-clear they may act on. A tool that over-reports costs a migration that
+was not needed. Those two errors are not equal, and I would rather my tool make the second.
 
-**The consequences are borne by users.** A holder who consults two wallets, two explorers, or two
-custodians during a migration window can receive contradictory statements about the same coins.
-If BIP 361 or a comparable proposal advances, "is this output legacy-vulnerable" becomes a
-question with financial consequences, asked at scale, by software that must agree.
+BIP 360 gives Bitcoin an output type whose key stays off the chain until a script-path
+spend. BIP 361 proposes a schedule for retiring legacy signatures. Both assume that the
+ecosystem can already tell which existing outputs are exposed. No BIP says how.
 
-This BIP does not propose a consensus change, does not rank outputs by risk, and does not
-recommend a migration policy. It specifies only the underlying observable: *has the key been
-published, and by what mechanism*. Risk models, user-facing severity ratings, and migration
-deadlines are left to their authors, who may then at least agree on the facts they are reasoning
-about.
+The cost of disagreement is not confusion. It is wrong decisions. A mining pool or a
+custodian deciding which addresses to move, and in what order, takes that decision from
+whatever tool it uses. Where tools disagree, some addresses that are already exposed stay
+where they are, and effort goes into moving addresses that were fine. If a proposal like
+BIP 361 activates, the same question is asked at scale, with money attached, by software
+that has to agree with other software.
+
+This document stops at the observable fact. It does not score risk and does not tell
+anyone when to migrate. My own tooling does score, and that score depends on balance,
+dormancy and assumptions about when a quantum computer arrives. Those are judgements, and
+other people will make them differently. Standardizing the fact underneath means those
+judgements at least get made over the same facts. An informative appendix maps each level
+to a minimum recommended action, because wallet developers asked for one; it is a floor
+for wording, not a risk model.
 
 ## Specification
 
@@ -400,6 +414,28 @@ being adopted.
 currently-proposed output type reaching `NOT_EXPOSED`. This BIP requires it only to classify P2MR
 outputs; the remainder applies unchanged if BIP 360 is never activated.
 
+## Appendix A: Holder Implications (Informative)
+
+This appendix is informative. It records, for each level, the minimum action a holder should be
+advised to take, together with a fixed key that implementations MAY expose alongside the level so
+that different wallets present the same baseline consistently. Implementations SHOULD NOT present
+advice that contradicts the floor. They are free to explain reasons, urgency and further options
+in their own words; the floor fixes the substance of the advice, not its wording.
+
+| Level | Action key | Floor |
+| --- | --- | --- |
+| `EXPOSED_AT_REST` | `MIGRATE` | Move the funds to an output type that is not exposed at rest as soon as one the holder trusts is available. Until then, do not add funds to the output. |
+| `EXPOSED_ON_SPEND` | `SWEEP_WHEN_SPENDING` | No action is needed while the output is unspent. When it is spent, spend the entire balance and do not send change or new funds back to the same script. |
+| `NOT_EXPOSED` | `NONE` | No action. |
+| `UNDETERMINED` | `TREAT_AS_MIGRATE` | Until the implementation can classify the output, advise as for `EXPOSED_AT_REST`. |
+
+The floor for `EXPOSED_AT_REST` depends on a destination existing. Before an output type such as
+P2MR ([BIP 360](bip-0360.mediawiki)) is available on the network, the only output that is not
+exposed at rest is a never-used hash-committed script, which is `EXPOSED_ON_SPEND` rather than
+`NOT_EXPOSED` but is not exposed today. The action text therefore names the property rather than
+a specific output type, and implementations SHOULD say which destinations they consider
+available.
+
 ## Backward Compatibility
 
 This BIP introduces no consensus, policy, or peer-to-peer protocol change. It defines an
@@ -427,6 +463,12 @@ history-dependent — when run directly. The vectors are additionally published 
 
 ## Changelog
 
+* 0.4.0 — Rewrote the Abstract and Motivation to state the author's reasoning directly,
+  including the misclassification in the author's own tooling that motivated the work. Added
+  Appendix A (informative): a fixed action key and a minimum recommended action per level, at the
+  request of wallet developers on Delving Bitcoin; wallets own wording, reasons and urgency above
+  the floor. The naming question for `EXPOSED_ON_SPEND` remains open with no new input; the
+  synonym rule from 0.3.0 stands.
 * 0.3.0 — Distinguished attacker-spendability (the basis of this classification) from
   holder-provability (a holder-retained secret such as a P2TR internal key), with a note in the
   P2TR discussion and a Rationale entry on why only the former can be classified deterministically

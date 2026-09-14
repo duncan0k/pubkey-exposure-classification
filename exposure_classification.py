@@ -45,6 +45,21 @@ def most_exposed(*levels: Level) -> Level:
     return min(levels, key=_ORDER.index)
 
 
+#: Appendix A (informative): fixed action key per level. Wallets own the
+#: wording, reasons and urgency; this is the floor they should not contradict.
+ACTION = {
+    Level.EXPOSED_AT_REST: "MIGRATE",
+    Level.EXPOSED_ON_SPEND: "SWEEP_WHEN_SPENDING",
+    Level.NOT_EXPOSED: "NONE",
+    Level.UNDETERMINED: "TREAT_AS_MIGRATE",
+}
+
+
+def recommended_action(level: Level) -> str:
+    """Return the Appendix A action key for a level."""
+    return ACTION[level]
+
+
 # --------------------------------------------------------------------------
 # Script recognition
 # --------------------------------------------------------------------------
@@ -322,7 +337,15 @@ def _run() -> int:
     failures += not ok
     print(f"{'PASS' if ok else 'FAIL'}  fail-closed combinator            -> {got.value}")
 
-    total = len(SCRIPT_VECTORS) + len(HISTORY_VECTORS) + 2
+    # Appendix A: every level has exactly one action key.
+    expected_actions = {"EXPOSED_AT_REST": "MIGRATE", "EXPOSED_ON_SPEND": "SWEEP_WHEN_SPENDING",
+                        "NOT_EXPOSED": "NONE", "UNDETERMINED": "TREAT_AS_MIGRATE"}
+    for lvl in Level:
+        ok = recommended_action(lvl) == expected_actions[lvl.value]
+        failures += not ok
+        print(f"{'PASS' if ok else 'FAIL'}  action {lvl.value:<18} -> {recommended_action(lvl)}")
+
+    total = len(SCRIPT_VECTORS) + len(HISTORY_VECTORS) + 2 + len(Level)
     print(f"\n{total} vectors, {failures} failing")
     return 1 if failures else 0
 

@@ -130,5 +130,12 @@
       "history_complete": false,
       "expected": "UNDETERMINED"
     }
-  ]
+  ],
+  "appendix_a_actions": {
+    "_note": "Informative. Fixed action key per level; wallets own wording above this floor.",
+    "EXPOSED_AT_REST": "MIGRATE",
+    "EXPOSED_ON_SPEND": "SWEEP_WHEN_SPENDING",
+    "NOT_EXPOSED": "NONE",
+    "UNDETERMINED": "TREAT_AS_MIGRATE"
+  }
 }
