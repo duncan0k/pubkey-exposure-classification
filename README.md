@@ -11,15 +11,17 @@ been assigned a BIP number and is not a ratified standard — it is published he
 feedback before being proposed to the BIPs repository, per
 [BIP 3](https://github.com/bitcoin/bips/blob/master/bip-0003.md).
 
-Discussion is on the [Bitcoin Development Mailing List](https://groups.google.com/g/bitcoindev).
-Corrections and objections are welcome as issues here or replies there.
+Discussion is on the [Bitcoin Development Mailing List](https://groups.google.com/g/bitcoindev)
+and [Delving Bitcoin](https://delvingbitcoin.org/t/2866). Corrections and objections are welcome
+as issues here or replies there.
 
 ## Why
 
-[BIP 360](https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki) defines an output type
-whose key stays off-chain until a script-path spend. BIP 361 proposes a phased sunset of legacy
-signature verification. Both presuppose that the ecosystem can determine *which existing outputs
-are exposed* — and no BIP specifies how that determination is made.
+[BIP 360](https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki) defines the two attacks
+this classification is built on, long exposure and short exposure, and lists which output types
+are vulnerable to the first. BIP 361 proposes a phased sunset of legacy signature verification.
+Between them sits the question tools disagree on: for a given output, what counts as revealed,
+and what to report when the chain cannot be read in full.
 
 The gap is visible in published data. Estimates of the exposed supply range from roughly 25% to
 over 34%. The spread is definitional, not measurement error: implementations disagree on whether
@@ -32,7 +34,7 @@ from P2PK, and what to report for a script whose contents have never been reveal
 | --- | --- | --- |
 | `EXPOSED_AT_REST` | The key is on-chain. An adversary can derive it offline and spend at will. | `MIGRATE` |
 | `EXPOSED_ON_SPEND` | The key is not on-chain, but spending will publish it. | `SWEEP_WHEN_SPENDING` |
-| `NOT_EXPOSED` | The key is not on-chain, and spending does not publish a key usable elsewhere. | `NONE` |
+| `NOT_EXPOSED` | The output type's consensus rules never require a secp256k1 key to spend. No deployed type qualifies; P2MR is `EXPOSED_ON_SPEND`. | `NONE` |
 | `UNDETERMINED` | Script semantics unrecognized; no sound statement can be made. | `TREAT_AS_MIGRATE` |
 
 The action keys are an informative floor requested by wallet developers: wallets own the wording,

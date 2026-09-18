@@ -4,7 +4,7 @@
 Self-contained; no dependencies beyond the standard library. Run directly to
 execute the test vectors from the BIP text:
 
-    python3 reference-implementation.py
+    python3 exposure_classification.py
 
 SPDX-License-Identifier: BSD-2-Clause OR CC0-1.0
 """
@@ -29,6 +29,8 @@ class Level(str, Enum):
     #: as a clearer name (see the draft's Rationale); treat both as synonyms.
     EXPOSED_ON_SPEND = "EXPOSED_ON_SPEND"
     UNDETERMINED = "UNDETERMINED"
+    #: Reserved for output types whose consensus rules never require secp256k1
+    #: key material. No deployed type qualifies; P2MR is EXPOSED_ON_SPEND.
     NOT_EXPOSED = "NOT_EXPOSED"
 
 
@@ -81,8 +83,10 @@ class ScriptType:
     #: Key material sits in the scriptPubKey itself; exposed from the moment
     #: the output is created.
     structural: bool
-    #: Spending this output necessarily publishes key material usable against
-    #: other outputs locked to the same key.
+    #: Spending this output publishes secp256k1 key material: the key for
+    #: key-committing types, the script and its keys for script-committing
+    #: types, the executed leaf with its path and key for P2MR. False only for
+    #: a type whose consensus rules never require such material; none deployed.
     discloses_on_spend: bool
     #: The implementation understands this template's key semantics. When false,
     #: no sound statement can be made and UNDETERMINED is required.
@@ -166,9 +170,10 @@ def recognize(script: bytes) -> ScriptType:
             # the internal key was chosen, so a NUMS internal key does not help.
             return ScriptType("P2TR", True, True, keys=(program.hex(),))
         if version == 2 and len(program) == 32:
-            # BIP 360 P2MR: the program is a TapBranch Merkle root, not a key.
-            # A script-path spend reveals only the executed leaf.
-            return ScriptType("P2MR", False, False)
+            # BIP 360 P2MR: the program is a TapBranch Merkle root, not a key, so
+            # nothing is exposed at rest. A leaf spend still publishes the leaf's
+            # secp256k1 key with the leaf and its Merkle path: exposed on spend.
+            return ScriptType("P2MR", False, True)
         # Valid witness program, semantics unassigned.
         return ScriptType(
             f"witness-v{version}-{len(program)}B", False, False, recognized=False
@@ -225,7 +230,8 @@ def classify(script: bytes, state: Optional[ChainState] = None) -> Level:
             return Level.EXPOSED_AT_REST
         return Level.EXPOSED_ON_SPEND
 
-    # 5. P2MR and friends: spending discloses only the executed leaf.
+    # 5. Types whose consensus rules never require secp256k1 key material
+    #    (none deployed): neither attack applies.
     if not t.discloses_on_spend:
         return Level.NOT_EXPOSED
 
@@ -273,7 +279,7 @@ SCRIPT_VECTORS = [
      Level.EXPOSED_AT_REST),
     # P2MR (BIP 360)
     ("52201111111111111111111111111111111111111111111111111111111111111111",
-     Level.NOT_EXPOSED),
+     Level.EXPOSED_ON_SPEND),
     # Witness v2, 16-byte program — valid per BIP 350, semantics unassigned
     ("5210751e76e8199196d454941c45d1b3a323", Level.UNDETERMINED),
     # Witness v16, 40-byte program
@@ -298,7 +304,9 @@ HISTORY_VECTORS = [
     ("P2TR, no transactions at all",
      P2TR, ChainState(spent_output_count=0, history_complete=True), Level.EXPOSED_AT_REST),
     ("P2MR, unspent",
-     P2MR, ChainState(spent_output_count=0, history_complete=True), Level.NOT_EXPOSED),
+     P2MR, ChainState(spent_output_count=0, history_complete=True), Level.EXPOSED_ON_SPEND),
+    ("P2MR, spent from, balance remains",
+     P2MR, ChainState(spent_output_count=1, history_complete=True), Level.EXPOSED_AT_REST),
     ("P2PKH, no aggregate stats and incomplete history",
      P2PKH, ChainState(spent_output_count=None, history_complete=False), Level.UNDETERMINED),
 ]

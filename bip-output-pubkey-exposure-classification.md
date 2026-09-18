@@ -4,12 +4,12 @@
   Title: Output Public Key Exposure Classification
   Authors: duncan0k <duncan0k@cipherscope.io>
   Status: Draft
-  Type: Specification
+  Type: Informational
   Assigned: ?
   License: BSD-2-Clause OR CC0-1.0
   Discussion: 2026-09-03: https://delvingbitcoin.org/t/standardizing-an-exposure-classification-for-existing-outputs-pre-bip/2866
               2026-09-04: https://gnusha.org/pi/bitcoindev/010001a06dd4cdd9-b8082042-8750-4e9a-917e-2053c919e4c4-000000@email.amazonses.com/
-  Version: 0.4.0
+  Version: 0.5.0
   Requires: 360
 ```
 
@@ -18,11 +18,13 @@
 This document defines four exposure levels for Bitcoin outputs. The level answers one
 question: how much would an attacker holding a cryptographically relevant quantum computer
 have to do to take the coins? For one level the answer is nothing but wait. For another,
-win a race against a single transaction. For another, the attack does not apply. For the
-last, nobody can say yet.
+win a race against a single transaction. For another, the attack does not apply; no output
+type deployed today reaches it. For the last, nobody can say yet.
 
-The levels are derived only from what the block chain shows, so two implementations
-looking at the same chain state must reach the same answer. An implementation that cannot
+The first two levels are the long exposure and short exposure vulnerabilities that BIP 360
+defines, stated for one output rather than for an output type. The levels are derived only
+from what the block chain shows, so two implementations looking at the same chain state
+must reach the same answer. An implementation that cannot
 tell must say so rather than report the output as safe.
 
 ## Motivation
@@ -46,15 +48,23 @@ not measurement noise. It comes from definitional choices that are usually not s
   be observed, and tools differ on what to report.
 - Keys disclosed off-chain, through an xpub given to a service or a spend of the same
   output on a fork. Some counts include these; the chain cannot see them.
+- A P2MR output, once BIP 360 activates. It resists long exposure, and that is easy to
+  read as safe. A spend still puts the leaf key in the mempool. Four revisions of this
+  document made that mistake.
 
 One rule runs through everything that follows: when the data cannot distinguish two
 levels, the classifier reports the more exposed one. A tool that under-reports hands
 someone a false all-clear they may act on. A tool that over-reports costs a migration that
 was not needed. Those two errors are not equal, and I would rather my tool make the second.
 
-BIP 360 gives Bitcoin an output type whose key stays off the chain until a script-path
-spend. BIP 361 proposes a schedule for retiring legacy signatures. Both assume that the
-ecosystem can already tell which existing outputs are exposed. No BIP says how.
+BIP 360 already draws the line this document builds on. Its motivation separates long
+exposure attacks, on keys that sit on the chain, from short exposure attacks, on keys that
+appear in the mempool while a spend confirms. It lists which output types are vulnerable to
+the first, and notes that the others become vulnerable the moment their script reveals a
+key. That list is a statement about output types. Every disagreement above lives under its
+footnote: what counts as revealed, for which outputs, and what to report when the chain
+cannot be read in full. BIP 361 proposes a schedule for retiring legacy signatures and would
+ask that question at scale. Neither document answers it, and it is not their job to.
 
 The cost of disagreement is not confusion. It is wrong decisions. A mining pool or a
 custodian deciding which addresses to move, and in what order, takes that decision from
@@ -89,6 +99,11 @@ are to be interpreted as described in RFC 2119.
 * **Disclosed** — an output `O` is disclosed if every member of a sufficient subset of its
   spending key set has been published. For an `m`-of-`n` multisig output, publication of any `m`
   of the `n` keys is sufficient.
+* **Long exposure** and **short exposure** — the two attacks [BIP 360](bip-0360.mediawiki)
+  defines: on key material that sits on the chain, and on key material that appears in the
+  mempool while a spending transaction waits to confirm. `EXPOSED_AT_REST` is the first
+  vulnerability stated for one output; `EXPOSED_ON_SPEND` marks an output subject only to the
+  second.
 
 Unconfirmed transactions MUST NOT be used to determine an exposure level. A transaction in the
 mempool discloses key material to observers, but that disclosure is not yet a property of the
@@ -103,7 +118,8 @@ Every output is assigned exactly one of four levels.
 
 The output is disclosed. A CRQC-equipped adversary can derive the spending key offline and spend
 the output at a time of its choosing, without waiting for the legitimate owner to act. No
-observable on-chain event gives the owner warning or an opportunity to react.
+observable on-chain event gives the owner warning or an opportunity to react. This is BIP 360's
+long exposure vulnerability, applied to a single output.
 
 An output is `EXPOSED_AT_REST` if either condition holds:
 
@@ -120,7 +136,9 @@ the key was disclosed by a spend rather than by the `scriptPubKey`.
 The output is not disclosed, but spending it will necessarily publish key material. The adversary
 has no offline attack. The exposure window opens when a spending transaction is broadcast and
 closes when it is confirmed and buried; within that window, an adversary capable of deriving the
-key faster than the transaction confirms may replace it.
+key faster than the transaction confirms may replace it. This is BIP 360's short exposure
+vulnerability. BIP 360 notes that Bitcoin outputs are generally subject to it; that includes
+P2MR until a leaf can be satisfied without secp256k1 key material.
 
 Note that this level describes an output that is *safe at rest*: the holder still knows something
 the adversary does not. The name has been read as "already exposed" by at least one reviewer;
@@ -128,10 +146,17 @@ the adversary does not. The name has been read as "already exposed" by at least 
 
 #### `NOT_EXPOSED`
 
-The output is not disclosed, and spending it does not publish key material capable of spending
-any other output. This level is reachable only by output types designed with that property, such
-as P2MR ([BIP 360](bip-0360.mediawiki)), where a script-path spend reveals only the leaf actually
-executed.
+The output's consensus rules do not require secp256k1 key material to spend it, so neither attack
+applies: nothing sits on the chain to attack at rest, and nothing appears in the mempool at spend
+time. This level is a property of the output *type*, established by its consensus rules. It MUST
+NOT be inferred for a hash-committed script from the absence of evidence about the script's
+contents.
+
+No output type deployed at the time of writing has this property. P2MR
+([BIP 360](bip-0360.mediawiki)) does not: removing the key path is what keeps it from being
+exposed at rest, but every leaf that can be satisfied today is satisfied with a secp256k1
+signature. The level is defined now so that an output type built on a post-quantum signature
+scheme has a level to go to when one exists.
 
 #### `UNDETERMINED`
 
@@ -161,6 +186,8 @@ Consequences that follow from this rule:
 * Truncated or partial transaction history MUST NOT yield `NOT_EXPOSED`; see
   [Classification Under Partial History](#classification-under-partial-history).
 * Output types not recognized by the implementation MUST yield `UNDETERMINED`.
+* `NOT_EXPOSED` is assigned by output type only; it MUST NOT be inferred from the contents of a
+  script that has not been revealed.
 
 ### Classification by Output Type
 
@@ -179,7 +206,7 @@ type.
 | P2SH | `HASH160` of the redeem script | `EXPOSED_ON_SPEND` |
 | P2WSH | `SHA256` of the witness script | `EXPOSED_ON_SPEND` |
 | P2TR | 32-byte x-only output key | `EXPOSED_AT_REST` |
-| P2MR ([BIP 360](bip-0360.mediawiki)) | 32-byte `TapBranch` Merkle root | `NOT_EXPOSED` |
+| P2MR ([BIP 360](bip-0360.mediawiki)) | 32-byte `TapBranch` Merkle root | `EXPOSED_ON_SPEND` |
 | Other witness versions / programs | undetermined | `UNDETERMINED` |
 | Non-standard or unparsable | undetermined | `UNDETERMINED` |
 
@@ -213,19 +240,26 @@ rule therefore assigns `EXPOSED_ON_SPEND`. A P2SH or P2WSH output committing to 
 requires no signature would in fact be unexposed, but this is unobservable before the spend and
 MUST NOT be assumed.
 
-**P2MR is `NOT_EXPOSED` only for its own outputs.** A script-path spend publishes the leaf script
-that was executed, and any keys in it. Those keys become disclosed, and any *other* output whose
-spending key set they satisfy is thereby `EXPOSED_AT_REST` by the derived condition. The
-`NOT_EXPOSED` level is a property of the unspent output, not a permanent property of its keys.
+**P2MR is `EXPOSED_ON_SPEND`, not `NOT_EXPOSED`.** BIP 360 removes the key path, so nothing about
+a P2MR output's keys sits on the chain: it is not exposed at rest, which is the property BIP 360
+set out to provide. That says nothing about the spend. A script-path spend publishes the executed
+leaf script, its Merkle path, and whatever satisfies the leaf; with the tapscript available today
+that is a secp256k1 signature and the key it verifies against. While the spend waits to confirm,
+an adversary who derives that key from the mempool holds a complete recipe for spending the same
+output through the same leaf. That is the race which defines `EXPOSED_ON_SPEND`, and it is the
+same race a P2WSH spend runs. BIP 360 says as much: P2MR resists long exposure attacks, and
+protection from short exposure attacks waits on post-quantum signatures. An implementation
+cannot observe the leaves of an unspent tree, so it MUST NOT assume a leaf that needs no
+signature, exactly as for P2SH and P2WSH. Versions of this document before 0.5.0 assigned
+`NOT_EXPOSED` here on the strength of the at-rest property alone. That was an error.
 
-Note that publication of a leaf key alone does not make a P2MR output disclosed: spending a P2MR
-output additionally requires the leaf script and its Merkle path, neither of which is observable
-from the output. The derived condition applies to a P2MR output only when a complete spend
-recipe has been published — in practice, when an output committing to the *same* script tree was
-previously spent through a leaf whose keys are disclosed. An implementation cannot observe the
-leaves of a never-spent tree, so a classifier restricted to chain data will report such an
-output `NOT_EXPOSED`; this is the intended reading of the levels as statements about what the
-chain shows (see [Out-of-Band Disclosure](#out-of-band-disclosure)).
+A leaf spend also discloses the tree for every *other* output committing to the same root: the
+leaf script and Merkle path it publishes, with the derived key, are a complete spend recipe for
+any such output, which is therefore `EXPOSED_AT_REST` by the derived condition. Publication of a
+leaf key alone does not make a P2MR output disclosed, since spending needs the leaf and its path
+as well; the derived condition applies to a P2MR output only when a complete recipe has been
+published, in practice when an output committing to the same tree was previously spent through a
+leaf whose keys are disclosed.
 
 ### Classification Under Partial History
 
@@ -237,15 +271,17 @@ Where an implementation has access to aggregate output statistics for a script, 
 inference is sound and requires no history traversal:
 
 > If the script has a confirmed spent-output count greater than zero, at least one spend has
-> occurred. For every type in the table above other than P2MR and `UNDETERMINED`, a spend
-> publishes the material committed to by the script — the key for key-committing types, the full
-> script (and any keys it contains) for script-committing types. The script is therefore
-> disclosed, and all of its outputs are `EXPOSED_AT_REST` by the derived condition.
+> occurred. For every type in the table above other than `UNDETERMINED`, a spend publishes the
+> material committed to by the script — the key for key-committing types, the full script (and
+> any keys it contains) for script-committing types, and for P2MR the executed leaf with its
+> Merkle path and keys, which is a complete recipe for every output committing to the same tree.
+> The script is therefore disclosed, and all of its outputs are `EXPOSED_AT_REST` by the derived
+> condition.
 
-For a script-hash output whose revealed script requires no signature, this floor over-approximates
-— no key material was actually published. The error is in the conservative direction, which the
-fail-closed rule permits; an implementation that retrieves the revealing transaction SHOULD
-refine the level from the actual script content.
+For a script-hash or P2MR output whose revealed script or leaf requires no signature, this floor
+over-approximates — no key material was actually published. The error is in the conservative
+direction, which the fail-closed rule permits; an implementation that retrieves the revealing
+transaction SHOULD refine the level from the actual script content.
 
 This yields a classification in constant time from an aggregate counter, and remains correct as a
 lower bound when history retrieval is truncated. Implementations SHOULD use it as a floor:
@@ -335,7 +371,7 @@ a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba87
 
 # P2MR (witness v2, 32-byte program, BIP 360)
 52201111111111111111111111111111111111111111111111111111111111111111
-=> NOT_EXPOSED
+=> EXPOSED_ON_SPEND
 
 # Witness v2, 16-byte program — valid per BIP 350, semantics unassigned
 5210751e76e8199196d454941c45d1b3a323
@@ -355,6 +391,8 @@ History-dependent vectors, which require chain state rather than a script alone:
 | P2PKH script, no confirmed spend, retrieved history truncated | `EXPOSED_ON_SPEND` |
 | P2PKH script, no confirmed spend, complete history available | `EXPOSED_ON_SPEND` |
 | P2TR script, no transactions at all | `EXPOSED_AT_REST` |
+| P2MR script, no confirmed spend, complete history available | `EXPOSED_ON_SPEND` |
+| P2MR script, one or more confirmed spends, balance remains | `EXPOSED_AT_REST` |
 | P2MR script, script-path spend occurred, revealed leaf key reused elsewhere | revealed key's other outputs become `EXPOSED_AT_REST` |
 | Hash-committed script (e.g. P2PKH), aggregate statistics unavailable, history incomplete | `UNDETERMINED` |
 
@@ -366,6 +404,12 @@ threat and must move funds to a quantum-resistant output. An `EXPOSED_ON_SPEND` 
 under threat while the output sits unspent, but faces a race at the moment of spending; the
 mitigations differ, and so must the labels. The fourth level, `UNDETERMINED`, is required by the
 fail-closed rule rather than by any distinction in risk.
+
+**Why keep a level nothing reaches.** `NOT_EXPOSED` has no member today. It stays because the
+classification should outlive the current set of output types: when an output type spendable
+without secp256k1 key material exists, implementations need a level for it that is not
+`UNDETERMINED`, and defining it now fixes what that level must mean, a property of consensus
+rules and never an inference about a script nobody has seen.
 
 **Why disclosure mechanism does not change the level.** An earlier formulation of this
 classification treated structural exposure (P2PK, P2TR) and reuse-derived exposure (a spent-from
@@ -410,9 +454,13 @@ wallets must: given an output of a legacy type, has its key already been publish
 urgently must this particular holder act. The two are complementary; neither depends on the other
 being adopted.
 
-**Relationship to BIP 360.** BIP 360 supplies the destination for migration and is the only
-currently-proposed output type reaching `NOT_EXPOSED`. This BIP requires it only to classify P2MR
-outputs; the remainder applies unchanged if BIP 360 is never activated.
+**Relationship to BIP 360.** BIP 360 defines the two attacks this document classifies against and
+lists which output types are vulnerable to the first; the table above starts from that list, and
+the levels are named so that they read back onto its terms. BIP 360 also supplies the migration
+destination: P2MR is not exposed at rest, which is what a holder of an `EXPOSED_AT_REST` output
+needs, and it is `EXPOSED_ON_SPEND` like every hash-committed type until post-quantum leaves
+exist. This document requires BIP 360 for its terminology and to classify P2MR outputs; the
+remainder applies unchanged if BIP 360 is never activated.
 
 ## Appendix A: Holder Implications (Informative)
 
@@ -429,12 +477,11 @@ in their own words; the floor fixes the substance of the advice, not its wording
 | `NOT_EXPOSED` | `NONE` | No action. |
 | `UNDETERMINED` | `TREAT_AS_MIGRATE` | Until the implementation can classify the output, advise as for `EXPOSED_AT_REST`. |
 
-The floor for `EXPOSED_AT_REST` depends on a destination existing. Before an output type such as
-P2MR ([BIP 360](bip-0360.mediawiki)) is available on the network, the only output that is not
-exposed at rest is a never-used hash-committed script, which is `EXPOSED_ON_SPEND` rather than
-`NOT_EXPOSED` but is not exposed today. The action text therefore names the property rather than
-a specific output type, and implementations SHOULD say which destinations they consider
-available.
+The floor for `EXPOSED_AT_REST` names a property, not an output type. Any never-used
+hash-committed script is not exposed at rest, and so is P2MR ([BIP 360](bip-0360.mediawiki)) once
+it is available; all of them are `EXPOSED_ON_SPEND`, and the floor for that level then applies.
+Implementations SHOULD say which destinations they consider available, and SHOULD NOT describe
+any of them as `NOT_EXPOSED`.
 
 ## Backward Compatibility
 
@@ -443,11 +490,12 @@ observation over existing chain data, and no existing software becomes non-compl
 implementing it.
 
 Software that currently reports exposure under a different taxonomy will find its output changes
-in two respects on adopting this specification: reused, previously-spent scripts that retain a
-balance move from an on-spend classification to `EXPOSED_AT_REST`, and unrecognized output types
-move from an unexposed classification to `UNDETERMINED`. Both changes are in the conservative
-direction. Implementations SHOULD version their reports so that consumers can distinguish
-classifications produced before and after adoption.
+in three respects on adopting this document: reused, previously-spent scripts that retain a
+balance move from an on-spend classification to `EXPOSED_AT_REST`; unrecognized output types
+move from an unexposed classification to `UNDETERMINED`; and P2MR outputs, for software that
+followed versions of this document before 0.5.0, move from `NOT_EXPOSED` to `EXPOSED_ON_SPEND`.
+All three changes are in the conservative direction. Implementations SHOULD version their
+reports so that consumers can distinguish classifications produced before and after adoption.
 
 ## Reference Implementation
 
@@ -463,6 +511,16 @@ history-dependent — when run directly. The vectors are additionally published 
 
 ## Changelog
 
+* 0.5.0 — Changed the type to Informational. Cited BIP 360's long exposure and short exposure
+  attacks as the source of the first two levels and mapped the levels onto those terms, after
+  review by murch on Delving Bitcoin. Corrected the classification of P2MR from `NOT_EXPOSED` to
+  `EXPOSED_ON_SPEND`: a leaf spend publishes a secp256k1 key in the mempool, the same race as
+  P2WSH, and the at-rest property BIP 360 provides is not a spend-time property; rereading BIP 360
+  for the citation surfaced the error. Redefined `NOT_EXPOSED` as a property of an output type's
+  consensus rules that no deployed type has, added vectors for unspent and spent-from P2MR
+  scripts, extended the aggregate floor to P2MR, and reworded the Appendix A note and the
+  Backward Compatibility section accordingly. Reworked the Motivation to say what this document
+  adds under BIP 360's list rather than that no BIP addresses the question.
 * 0.4.0 — Rewrote the Abstract and Motivation to state the author's reasoning directly,
   including the misclassification in the author's own tooling that motivated the work. Added
   Appendix A (informative): a fixed action key and a minimum recommended action per level, at the

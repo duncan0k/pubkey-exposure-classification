@@ -63,7 +63,7 @@
       "template": "P2MR",
       "spent_output_count": 0,
       "history_complete": true,
-      "expected": "NOT_EXPOSED"
+      "expected": "EXPOSED_ON_SPEND"
     },
     {
       "script_pubkey": "5210751e76e8199196d454941c45d1b3a323",
@@ -121,7 +121,14 @@
       "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
       "spent_output_count": 0,
       "history_complete": true,
-      "expected": "NOT_EXPOSED"
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "description": "P2MR, spent from, balance remains",
+      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
+      "spent_output_count": 1,
+      "history_complete": true,
+      "expected": "EXPOSED_AT_REST"
     },
     {
       "description": "P2PKH, no aggregate stats and incomplete history",
