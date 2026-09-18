@@ -9,7 +9,7 @@
   License: BSD-2-Clause OR CC0-1.0
   Discussion: 2026-09-03: https://delvingbitcoin.org/t/standardizing-an-exposure-classification-for-existing-outputs-pre-bip/2866
               2026-09-04: https://gnusha.org/pi/bitcoindev/010001a06dd4cdd9-b8082042-8750-4e9a-917e-2053c919e4c4-000000@email.amazonses.com/
-  Version: 0.5.0
+  Version: 0.5.1
   Requires: 360
 ```
 
@@ -261,6 +261,10 @@ as well; the derived condition applies to a P2MR output only when a complete rec
 published, in practice when an output committing to the same tree was previously spent through a
 leaf whose keys are disclosed.
 
+Until BIP 360 activates, a witness version 2, 32-byte output is spendable by anyone under current
+consensus rules. That is not exposure to a quantum adversary but the absence of any lock, and it is
+outside this classification; implementations SHOULD flag it separately.
+
 ### Classification Under Partial History
 
 An implementation that cannot retrieve the complete transaction history of a script — because of
@@ -511,6 +515,9 @@ history-dependent — when run directly. The vectors are additionally published 
 
 ## Changelog
 
+* 0.5.1 — Noted that a witness version 2, 32-byte output is spendable by anyone until BIP 360
+  activates, which is outside this classification and which implementations SHOULD flag
+  separately.
 * 0.5.0 — Changed the type to Informational. Cited BIP 360's long exposure and short exposure
   attacks as the source of the first two levels and mapped the levels onto those terms, after
   review by murch on Delving Bitcoin. Corrected the classification of P2MR from `NOT_EXPOSED` to
