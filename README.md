@@ -63,9 +63,11 @@ classify(script, ChainState(spent_output_count=3, history_complete=True))
 # Level.EXPOSED_AT_REST  — a spend published the key
 ```
 
-The `spent_output_count` field carries an aggregate counter available from most indexers. It is
-what makes classification constant-time, and — more importantly — it is why a truncated history
-scan cannot produce a false `NOT_EXPOSED`.
+The `spent_output_count` field carries an aggregate counter available from most indexers. It
+makes the spend-history check constant-time and, more importantly, keeps a truncated history scan
+from under-reporting: once the count is positive, the outputs are `EXPOSED_AT_REST` whatever the
+scan returned. Matching keys published elsewhere takes time proportional to the number of
+disclosed keys.
 
 ## Running the vectors
 

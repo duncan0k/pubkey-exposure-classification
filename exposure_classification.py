@@ -304,19 +304,29 @@ def _lift_x(x: int) -> Optional[int]:
     return y if y * y % _P == y2 else None
 
 
+_HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
+
+
 def _disclosed_x(key_hex: str) -> Optional[int]:
     """x-coordinate of a disclosed key (33, 65 or 32 bytes), or None if invalid."""
-    try:
-        raw = bytes.fromhex(key_hex)
-    except (TypeError, ValueError):
+    # Bound the work before decoding: entries come from outside the classifier.
+    if not isinstance(key_hex, str) or len(key_hex) > 256:
         return None
+    key_hex = key_hex.strip()
+    if len(key_hex) not in (64, 66, 130) or not _HEX_DIGITS.issuperset(key_hex):
+        return None
+    raw = bytes.fromhex(key_hex)
     if len(raw) == 33 and raw[0] in (2, 3):
         x = int.from_bytes(raw[1:], "big")
-    elif len(raw) == 65 and raw[0] == 4:
+    elif len(raw) == 65 and raw[0] in (4, 6, 7):
         x = int.from_bytes(raw[1:33], "big")
-        y = _lift_x(x)
+        y = int.from_bytes(raw[33:], "big")
+        root = _lift_x(x)
         # The given y must be one of the two roots, not just any 32 bytes.
-        if y is None or int.from_bytes(raw[33:], "big") not in (y, _P - y):
+        if root is None or y not in (root, _P - root):
+            return None
+        # Hybrid keys (06/07) are valid only when the prefix matches y's parity.
+        if raw[0] != 4 and raw[0] != 6 + (y & 1):
             return None
         return x
     elif len(raw) == 32:
@@ -327,15 +337,22 @@ def _disclosed_x(key_hex: str) -> Optional[int]:
 
 
 def _serializations(x: int) -> List[bytes]:
-    """Every compressed and uncompressed encoding of the two points with this x."""
+    """Every encoding OP_CHECKSIG accepts under consensus for the two points
+    with this x: compressed, uncompressed and hybrid (06/07)."""
     y = _lift_x(x)
     assert y is not None
+    if y & 1:
+        y = _P - y
     xb = x.to_bytes(32, "big")
+    even = y.to_bytes(32, "big")
+    odd = (_P - y).to_bytes(32, "big")
     return [
         b"\x02" + xb,
         b"\x03" + xb,
-        b"\x04" + xb + y.to_bytes(32, "big"),
-        b"\x04" + xb + (_P - y).to_bytes(32, "big"),
+        b"\x04" + xb + even,
+        b"\x04" + xb + odd,
+        b"\x06" + xb + even,
+        b"\x07" + xb + odd,
     ]
 
 
@@ -393,25 +410,29 @@ def classify(script: bytes, state: Optional[ChainState] = None) -> Level:
     if not t.recognized:
         return Level.UNDETERMINED
 
-    # 4. Derived disclosure: a key that can spend this output was published
+    # 4. Constant-time floor: a confirmed spend has occurred, and for every
+    #    disclosing type a spend publishes key material. Correct even when
+    #    history retrieval was truncated. Checked before the derived scan so
+    #    this answer does not depend on the number of disclosed keys.
+    if t.discloses_on_spend and state.spent_output_count is not None:
+        if state.spent_output_count > 0:
+            return Level.EXPOSED_AT_REST
+
+    # 5. Derived disclosure: a key that can spend this output was published
     #    elsewhere. Same adversarial capability as structural disclosure.
     #    P2SH, P2WSH and P2MR would also need the committed script (for P2MR,
     #    the leaf and its Merkle path), which ChainState does not carry; for
-    #    them only the floor below and the script's own history apply.
+    #    them only the floor and the script's own history apply.
     if t.discloses_on_spend and state.disclosed_keys & set(t.keys or ()):
         return Level.EXPOSED_AT_REST
     if t.key_hash is not None and _key_hash_disclosed(t.key_hash, state.disclosed_keys):
         return Level.EXPOSED_AT_REST
 
-    # 5. Constant-time floor: a confirmed spend has occurred, and for every
-    #    disclosing type a spend publishes key material. Correct even when
-    #    history retrieval was truncated.
+    # 6. No spend on record: spending will publish the key, nothing has yet.
     if t.discloses_on_spend and state.spent_output_count is not None:
-        if state.spent_output_count > 0:
-            return Level.EXPOSED_AT_REST
         return Level.EXPOSED_ON_SPEND
 
-    # 6. Neither aggregate statistics nor complete history: refuse to guess.
+    # 7. Neither aggregate statistics nor complete history: refuse to guess.
     if not state.history_complete:
         return Level.UNDETERMINED
 
@@ -538,13 +559,16 @@ def _run() -> int:
 # Implementation checks (not part of the published vectors)
 # --------------------------------------------------------------------------
 
-#: The generator G and 2G, compressed and uncompressed.
+#: The generator G (even y), -G and 2G, compressed, uncompressed and hybrid.
 _G_X = "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
 _G_Y = "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+_NEG_G_Y = "b7c52588d95c3b9aa25b0403f1eef75702e84bb7597aabe663b82f6f04ef2777"
 _2G_X = "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
 G_COMPRESSED = "02" + _G_X
 G_NEGATED = "03" + _G_X
 G_UNCOMPRESSED = "04" + _G_X + _G_Y
+G_HYBRID = "06" + _G_X + _G_Y
+G_NEGATED_HYBRID = "07" + _G_X + _NEG_G_Y
 TWO_G_COMPRESSED = "02" + _2G_X
 
 
@@ -565,6 +589,8 @@ def _on_curve(pubkey_hex: str) -> bool:
         return False
     if len(raw) == 65:
         y = int.from_bytes(raw[33:], "big")
+        if raw[0] in (6, 7) and raw[0] != 6 + (y & 1):
+            return False
     elif raw[0] == 3:
         y = _P - y
     return x < _P and y < _P and (y * y - pow(x, 3, _P) - 7) % _P == 0
@@ -583,7 +609,8 @@ def _run_checks() -> int:
     print("\nImplementation checks")
     print()
     check("keys used below are on secp256k1",
-          all(_on_curve(k) for k in (G_COMPRESSED, G_NEGATED, G_UNCOMPRESSED, TWO_G_COMPRESSED)))
+          all(_on_curve(k) for k in (G_COMPRESSED, G_NEGATED, G_UNCOMPRESSED,
+                                     G_HYBRID, G_NEGATED_HYBRID, TWO_G_COMPRESSED)))
 
     def derived(label: str, script: bytes, keys: Set[str], expected: Level) -> None:
         state = ChainState(spent_output_count=0, history_complete=True, disclosed_keys=keys)
@@ -603,6 +630,18 @@ def _run_checks() -> int:
             _p2pkh(G_NEGATED), {G_COMPRESSED}, Level.EXPOSED_AT_REST)
     derived("P2PKH(K), unrelated key disclosed",
             _p2pkh(G_COMPRESSED), {TWO_G_COMPRESSED}, Level.EXPOSED_ON_SPEND)
+    derived("P2PKH(K hybrid 06), K disclosed compressed",
+            _p2pkh(G_HYBRID), {G_COMPRESSED}, Level.EXPOSED_AT_REST)
+    derived("P2WPKH(K hybrid 06), K disclosed compressed",
+            _p2wpkh(G_HYBRID), {G_COMPRESSED}, Level.EXPOSED_AT_REST)
+    derived("P2PKH(-K hybrid 07), K disclosed",
+            _p2pkh(G_NEGATED_HYBRID), {G_COMPRESSED}, Level.EXPOSED_AT_REST)
+    derived("P2PKH(K), K disclosed hybrid 06",
+            _p2pkh(G_COMPRESSED), {G_HYBRID}, Level.EXPOSED_AT_REST)
+    derived("P2PKH(K), hybrid 07 with even y disclosed",
+            _p2pkh(G_COMPRESSED), {"07" + _G_X + _G_Y}, Level.EXPOSED_ON_SPEND)
+    derived("P2PKH(K), 10**6-character entry disclosed",
+            _p2pkh(G_COMPRESSED), {"0" * 10**6}, Level.EXPOSED_ON_SPEND)
     malformed = {
         "", "zz", "abc", "02", "05" + _G_X, "02" + _G_X + "00",
         "04" + _G_X + "00" * 32,  # right x, y not on the curve
