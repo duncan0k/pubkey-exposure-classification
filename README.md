@@ -83,6 +83,11 @@ requires weighing balance, dormancy and CRQC timelines — none observable on-ch
 Standardizing the observable while leaving the weighing to implementers is what makes independent
 results comparable.
 
+The reference implementation applies the derived condition to P2PKH and P2WPKH by matching keys
+published elsewhere against the committed key hash. For P2SH, P2WSH and P2MR it would also need
+the committed script (for P2MR, the leaf and its Merkle path), so there it relies only on the
+spent-output count and the script's own history.
+
 Out-of-band disclosure — xpubs shared with service providers, spends of the corresponding output
 on a fork — is outside the classification by construction, since it leaves no evidence on the
 Bitcoin chain. A `NOT_EXPOSED` result asserts what the chain shows, not that no disclosure has

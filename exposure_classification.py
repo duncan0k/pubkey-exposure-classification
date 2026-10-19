@@ -11,9 +11,10 @@ SPDX-License-Identifier: BSD-2-Clause OR CC0-1.0
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 
 class Level(str, Enum):
@@ -94,6 +95,9 @@ class ScriptType:
     recognized: bool = True
     #: Public keys extractable from the scriptPubKey, as hex strings.
     keys: tuple = field(default=())
+    #: HASH160 of the public key the output commits to (P2PKH, P2WPKH), as hex.
+    #: Lets the derived condition match a key published elsewhere.
+    key_hash: Optional[str] = None
     #: Every spending path the type's consensus rules allow requires a
     #: post-quantum signature, hybrid schemes included. No deployed type has it.
     pq_signature_required: bool = False
@@ -139,7 +143,7 @@ def recognize(script: bytes) -> ScriptType:
         and script[23] == OP_EQUALVERIFY
         and script[24] == OP_CHECKSIG
     ):
-        return ScriptType("P2PKH", False, True)
+        return ScriptType("P2PKH", False, True, key_hash=script[3:23].hex())
 
     # P2SH: OP_HASH160 <push 20> <hash> OP_EQUAL
     if n == 23 and script[0] == OP_HASH160 and script[1] == 0x14 and script[22] == OP_EQUAL:
@@ -165,7 +169,7 @@ def recognize(script: bytes) -> ScriptType:
     if wp is not None:
         version, program = wp
         if version == 0 and len(program) == 20:
-            return ScriptType("P2WPKH", False, True)
+            return ScriptType("P2WPKH", False, True, key_hash=program.hex())
         if version == 0 and len(program) == 32:
             return ScriptType("P2WSH", False, True)
         if version == 1 and len(program) == 32:
@@ -184,6 +188,169 @@ def recognize(script: bytes) -> ScriptType:
         )
 
     return ScriptType("unrecognized", False, False, recognized=False)
+
+
+# --------------------------------------------------------------------------
+# Hashing and secp256k1 points
+# --------------------------------------------------------------------------
+
+_RL = [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+    7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
+    3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12,
+    1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2,
+    4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13,
+]
+_RR = [
+    5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12,
+    6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2,
+    15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13,
+    8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14,
+    12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11,
+]
+_SL = [
+    11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
+    7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12,
+    11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5,
+    11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12,
+    9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6,
+]
+_SR = [
+    8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6,
+    9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11,
+    9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5,
+    15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8,
+    8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11,
+]
+_KL = [0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E]
+_KR = [0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000]
+_M32 = 0xFFFFFFFF
+
+
+def _rmd_f(j: int, x: int, y: int, z: int) -> int:
+    if j == 0:
+        return x ^ y ^ z
+    if j == 1:
+        return (x & y) | (~x & z)
+    if j == 2:
+        return (x | ~y) ^ z
+    if j == 3:
+        return (x & z) | (y & ~z)
+    return x ^ (y | ~z)
+
+
+def _rol(x: int, n: int) -> int:
+    return ((x << n) | (x >> (32 - n))) & _M32
+
+
+def ripemd160_py(data: bytes) -> bytes:
+    """Pure-Python RIPEMD-160, for builds whose OpenSSL lacks it."""
+    msg = bytes(data) + b"\x80"
+    msg += b"\x00" * ((56 - len(msg)) % 64) + (8 * len(data)).to_bytes(8, "little")
+    h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
+    for off in range(0, len(msg), 64):
+        x = [int.from_bytes(msg[off + 4 * i : off + 4 * i + 4], "little") for i in range(16)]
+        al, bl, cl, dl, el = h
+        ar, br, cr, dr, er = h
+        for j in range(80):
+            r = j // 16
+            t = _rol((al + _rmd_f(r, bl, cl, dl) + x[_RL[j]] + _KL[r]) & _M32, _SL[j])
+            al, bl, cl, dl, el = el, (t + el) & _M32, bl, _rol(cl, 10), dl
+            t = _rol((ar + _rmd_f(4 - r, br, cr, dr) + x[_RR[j]] + _KR[r]) & _M32, _SR[j])
+            ar, br, cr, dr, er = er, (t + er) & _M32, br, _rol(cr, 10), dr
+        h = [
+            (h[1] + cl + dr) & _M32,
+            (h[2] + dl + er) & _M32,
+            (h[3] + el + ar) & _M32,
+            (h[4] + al + br) & _M32,
+            (h[0] + bl + cr) & _M32,
+        ]
+    return b"".join(v.to_bytes(4, "little") for v in h)
+
+
+def _hashlib_ripemd160() -> bool:
+    try:
+        hashlib.new("ripemd160")
+    except ValueError:
+        return False
+    return True
+
+
+#: Some OpenSSL 3 builds drop RIPEMD-160 from hashlib; fall back to ours then.
+HAVE_HASHLIB_RIPEMD160 = _hashlib_ripemd160()
+
+
+def ripemd160(data: bytes) -> bytes:
+    if HAVE_HASHLIB_RIPEMD160:
+        return hashlib.new("ripemd160", data).digest()
+    return ripemd160_py(data)
+
+
+def hash160(data: bytes) -> bytes:
+    """RIPEMD-160 of SHA-256, as committed to by P2PKH and P2WPKH."""
+    return ripemd160(hashlib.sha256(data).digest())
+
+
+#: secp256k1 field prime; the curve is y^2 = x^3 + 7.
+_P = 2**256 - 2**32 - 977
+
+
+def _lift_x(x: int) -> Optional[int]:
+    """Return a y with (x, y) on secp256k1, or None if x is not a coordinate."""
+    if x >= _P:
+        return None
+    y2 = (pow(x, 3, _P) + 7) % _P
+    y = pow(y2, (_P + 1) // 4, _P)
+    return y if y * y % _P == y2 else None
+
+
+def _disclosed_x(key_hex: str) -> Optional[int]:
+    """x-coordinate of a disclosed key (33, 65 or 32 bytes), or None if invalid."""
+    try:
+        raw = bytes.fromhex(key_hex)
+    except (TypeError, ValueError):
+        return None
+    if len(raw) == 33 and raw[0] in (2, 3):
+        x = int.from_bytes(raw[1:], "big")
+    elif len(raw) == 65 and raw[0] == 4:
+        x = int.from_bytes(raw[1:33], "big")
+        y = _lift_x(x)
+        # The given y must be one of the two roots, not just any 32 bytes.
+        if y is None or int.from_bytes(raw[33:], "big") not in (y, _P - y):
+            return None
+        return x
+    elif len(raw) == 32:
+        x = int.from_bytes(raw, "big")
+    else:
+        return None
+    return x if _lift_x(x) is not None else None
+
+
+def _serializations(x: int) -> List[bytes]:
+    """Every compressed and uncompressed encoding of the two points with this x."""
+    y = _lift_x(x)
+    assert y is not None
+    xb = x.to_bytes(32, "big")
+    return [
+        b"\x02" + xb,
+        b"\x03" + xb,
+        b"\x04" + xb + y.to_bytes(32, "big"),
+        b"\x04" + xb + (_P - y).to_bytes(32, "big"),
+    ]
+
+
+def _key_hash_disclosed(key_hash: str, disclosed_keys: Set[str]) -> bool:
+    """True if a disclosed key, or its negation, hashes to `key_hash`.
+
+    Solving the discrete log of P also gives the key of -P, and the hash commits
+    to one encoding while the adversary can produce any, so match on x alone.
+    """
+    target = bytes.fromhex(key_hash)
+    for key in disclosed_keys:
+        x = _disclosed_x(key)
+        if x is not None and any(hash160(s) == target for s in _serializations(x)):
+            return True
+    return False
 
 
 # --------------------------------------------------------------------------
@@ -228,7 +395,12 @@ def classify(script: bytes, state: Optional[ChainState] = None) -> Level:
 
     # 4. Derived disclosure: a key that can spend this output was published
     #    elsewhere. Same adversarial capability as structural disclosure.
+    #    P2SH, P2WSH and P2MR would also need the committed script (for P2MR,
+    #    the leaf and its Merkle path), which ChainState does not carry; for
+    #    them only the floor below and the script's own history apply.
     if t.discloses_on_spend and state.disclosed_keys & set(t.keys or ()):
+        return Level.EXPOSED_AT_REST
+    if t.key_hash is not None and _key_hash_disclosed(t.key_hash, state.disclosed_keys):
         return Level.EXPOSED_AT_REST
 
     # 5. Constant-time floor: a confirmed spend has occurred, and for every
@@ -362,5 +534,106 @@ def _run() -> int:
     return 1 if failures else 0
 
 
+# --------------------------------------------------------------------------
+# Implementation checks (not part of the published vectors)
+# --------------------------------------------------------------------------
+
+#: The generator G and 2G, compressed and uncompressed.
+_G_X = "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+_G_Y = "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+_2G_X = "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+G_COMPRESSED = "02" + _G_X
+G_NEGATED = "03" + _G_X
+G_UNCOMPRESSED = "04" + _G_X + _G_Y
+TWO_G_COMPRESSED = "02" + _2G_X
+
+
+def _p2pkh(pubkey_hex: str) -> bytes:
+    return bytes.fromhex("76a914") + hash160(bytes.fromhex(pubkey_hex)) + bytes.fromhex("88ac")
+
+
+def _p2wpkh(pubkey_hex: str) -> bytes:
+    return bytes.fromhex("0014") + hash160(bytes.fromhex(pubkey_hex))
+
+
+def _on_curve(pubkey_hex: str) -> bool:
+    """Check a key directly against y^2 = x^3 + 7, independent of _disclosed_x."""
+    raw = bytes.fromhex(pubkey_hex)
+    x = int.from_bytes(raw[1:33], "big")
+    y = _lift_x(x)
+    if y is None:
+        return False
+    if len(raw) == 65:
+        y = int.from_bytes(raw[33:], "big")
+    elif raw[0] == 3:
+        y = _P - y
+    return x < _P and y < _P and (y * y - pow(x, 3, _P) - 7) % _P == 0
+
+
+def _run_checks() -> int:
+    failures = 0
+    count = 0
+
+    def check(label: str, ok: bool, detail: str = "") -> None:
+        nonlocal failures, count
+        count += 1
+        failures += not ok
+        print(f"{'PASS' if ok else 'FAIL'}  {label:<48} {detail}")
+
+    print("\nImplementation checks")
+    print()
+    check("keys used below are on secp256k1",
+          all(_on_curve(k) for k in (G_COMPRESSED, G_NEGATED, G_UNCOMPRESSED, TWO_G_COMPRESSED)))
+
+    def derived(label: str, script: bytes, keys: Set[str], expected: Level) -> None:
+        state = ChainState(spent_output_count=0, history_complete=True, disclosed_keys=keys)
+        try:
+            got = classify(script, state).value
+        except Exception as exc:  # a malformed entry must never raise
+            got = f"raised {type(exc).__name__}"
+        check(label, got == expected.value, f"{got:<18} expected {expected.value}")
+
+    derived("P2PKH(K), K disclosed compressed",
+            _p2pkh(G_COMPRESSED), {G_COMPRESSED}, Level.EXPOSED_AT_REST)
+    derived("P2PKH(K uncompressed), K disclosed compressed",
+            _p2pkh(G_UNCOMPRESSED), {G_COMPRESSED}, Level.EXPOSED_AT_REST)
+    derived("P2WPKH(K), K disclosed x-only",
+            _p2wpkh(G_COMPRESSED), {_G_X}, Level.EXPOSED_AT_REST)
+    derived("P2PKH(-K), K disclosed",
+            _p2pkh(G_NEGATED), {G_COMPRESSED}, Level.EXPOSED_AT_REST)
+    derived("P2PKH(K), unrelated key disclosed",
+            _p2pkh(G_COMPRESSED), {TWO_G_COMPRESSED}, Level.EXPOSED_ON_SPEND)
+    malformed = {
+        "", "zz", "abc", "02", "05" + _G_X, "02" + _G_X + "00",
+        "04" + _G_X + "00" * 32,  # right x, y not on the curve
+        "02" + "ff" * 32,  # x beyond the field prime
+        "02" + "00" * 31 + "05",  # x = 5 has no y on secp256k1
+        "00" * 31 + "05",
+    }
+    derived("P2PKH(K), malformed and off-curve keys disclosed",
+            _p2pkh(G_COMPRESSED), malformed, Level.EXPOSED_ON_SPEND)
+
+    standard = [
+        (b"", "9c1185a5c5e9fc54612808977ee8f548b2258d31"),
+        (b"abc", "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc"),
+        (b"message digest", "5d0689ef49d2fae572b881b123a85ffa21595f36"),
+    ]
+    for msg, digest in standard:
+        got = ripemd160_py(msg).hex()
+        check(f"ripemd160_py({msg!r})", got == digest, got)
+    if HAVE_HASHLIB_RIPEMD160:
+        lengths = (1, 55, 56, 63, 64, 65, 127, 128, 1000)
+        msgs = [bytes((7 * i + n) % 256 for i in range(n)) for n in lengths]
+        check(f"ripemd160_py matches hashlib, lengths {lengths[1:6]} etc.",
+              all(ripemd160_py(m) == hashlib.new("ripemd160", m).digest() for m in msgs))
+    else:
+        print("SKIP  ripemd160_py vs hashlib: hashlib has no ripemd160")
+
+    print(f"\n{count} implementation checks, {failures} failing")
+    return 1 if failures else 0
+
+
 if __name__ == "__main__":
-    raise SystemExit(_run())
+    vectors_failed = _run()
+    checks_failed = _run_checks()
+    raise SystemExit(1 if vectors_failed or checks_failed else 0)
