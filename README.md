@@ -34,7 +34,7 @@ from P2PK, and what to report for a script whose contents have never been reveal
 | --- | --- | --- |
 | `EXPOSED_AT_REST` | The key is on-chain. An adversary can derive it offline and spend at will. | `MIGRATE` |
 | `EXPOSED_ON_SPEND` | The key is not on-chain, but spending will publish it. | `SWEEP_WHEN_SPENDING` |
-| `NOT_EXPOSED` | The output type's consensus rules never require a secp256k1 key to spend. No deployed type qualifies; P2MR is `EXPOSED_ON_SPEND`. | `NONE` |
+| `NOT_EXPOSED` | The output type's consensus rules require a post-quantum signature on every spending path, hybrid schemes included. No deployed type qualifies; P2MR is `EXPOSED_ON_SPEND`. | `NONE` |
 | `UNDETERMINED` | Script semantics unrecognized; no sound statement can be made. | `TREAT_AS_MIGRATE` |
 
 The action keys are an informative floor requested by wallet developers: wallets own the wording,

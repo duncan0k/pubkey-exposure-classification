@@ -29,8 +29,9 @@ class Level(str, Enum):
     #: as a clearer name (see the draft's Rationale); treat both as synonyms.
     EXPOSED_ON_SPEND = "EXPOSED_ON_SPEND"
     UNDETERMINED = "UNDETERMINED"
-    #: Reserved for output types whose consensus rules never require secp256k1
-    #: key material. No deployed type qualifies; P2MR is EXPOSED_ON_SPEND.
+    #: Reserved for output types whose consensus rules require a post-quantum
+    #: signature on every spending path, hybrid schemes included. No deployed
+    #: type qualifies; P2MR is EXPOSED_ON_SPEND.
     NOT_EXPOSED = "NOT_EXPOSED"
 
 
@@ -85,14 +86,17 @@ class ScriptType:
     structural: bool
     #: Spending this output publishes secp256k1 key material: the key for
     #: key-committing types, the script and its keys for script-committing
-    #: types, the executed leaf with its path and key for P2MR. False only for
-    #: a type whose consensus rules never require such material; none deployed.
+    #: types, the executed leaf with its path and key for P2MR. True for every
+    #: recognized type.
     discloses_on_spend: bool
     #: The implementation understands this template's key semantics. When false,
     #: no sound statement can be made and UNDETERMINED is required.
     recognized: bool = True
     #: Public keys extractable from the scriptPubKey, as hex strings.
     keys: tuple = field(default=())
+    #: Every spending path the type's consensus rules allow requires a
+    #: post-quantum signature, hybrid schemes included. No deployed type has it.
+    pq_signature_required: bool = False
 
 
 def _witness_program(script: bytes) -> Optional[tuple]:
@@ -207,33 +211,33 @@ def classify(script: bytes, state: Optional[ChainState] = None) -> Level:
     state = state or ChainState()
     t = recognize(script)
 
-    # 1. Structural disclosure: key material is in the scriptPubKey itself.
+    # 1. Post-quantum types (none deployed): a derived secp256k1 private key
+    #    alone cannot spend the output, so this precedes every rule below.
+    if t.pq_signature_required:
+        return Level.NOT_EXPOSED
+
+    # 2. Structural disclosure: key material is in the scriptPubKey itself.
     if t.structural:
         return Level.EXPOSED_AT_REST
 
-    # 2. Unrecognized semantics: nothing sound can be said. Checked before the
+    # 3. Unrecognized semantics: nothing sound can be said. Checked before the
     #    history rules, because a spend of an unknown script does not
     #    demonstrably publish key material either.
     if not t.recognized:
         return Level.UNDETERMINED
 
-    # 3. Derived disclosure: a key that can spend this output was published
+    # 4. Derived disclosure: a key that can spend this output was published
     #    elsewhere. Same adversarial capability as structural disclosure.
     if t.discloses_on_spend and state.disclosed_keys & set(t.keys or ()):
         return Level.EXPOSED_AT_REST
 
-    # 4. Constant-time floor: a confirmed spend has occurred, and for every
+    # 5. Constant-time floor: a confirmed spend has occurred, and for every
     #    disclosing type a spend publishes key material. Correct even when
     #    history retrieval was truncated.
     if t.discloses_on_spend and state.spent_output_count is not None:
         if state.spent_output_count > 0:
             return Level.EXPOSED_AT_REST
         return Level.EXPOSED_ON_SPEND
-
-    # 5. Types whose consensus rules never require secp256k1 key material
-    #    (none deployed): neither attack applies.
-    if not t.discloses_on_spend:
-        return Level.NOT_EXPOSED
 
     # 6. Neither aggregate statistics nor complete history: refuse to guess.
     if not state.history_complete:
