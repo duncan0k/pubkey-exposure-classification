@@ -4,12 +4,10 @@ A deterministic, conservative classification that assigns every Bitcoin output a
 level* describing whether the public key required to spend it has already been published
 on-chain.
 
-The draft specification is
-[`bip-output-pubkey-exposure-classification.md`](bip-output-pubkey-exposure-classification.md);
-this repository also carries its reference implementation and test vectors. The draft has not
-been assigned a BIP number and is not a ratified standard — it is published here to gather
-feedback before being proposed to the BIPs repository, per
-[BIP 3](https://github.com/bitcoin/bips/blob/master/bip-0003.md).
+This repository contains the draft specification ([`bip-0362.md`](bip-0362.md)), its reference
+implementation, and test vectors. The draft was assigned BIP number 362 in
+[bitcoin/bips#2294](https://github.com/bitcoin/bips/pull/2294), but it is not a ratified
+standard.
 
 Discussion is on the [Bitcoin Development Mailing List](https://groups.google.com/g/bitcoindev)
 and [Delving Bitcoin](https://delvingbitcoin.org/t/2866). Corrections and objections are welcome
