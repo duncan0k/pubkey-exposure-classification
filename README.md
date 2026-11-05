@@ -1,71 +1,75 @@
 # Public Key Exposure Classification
 
-A deterministic, conservative classification that assigns every Bitcoin output an *exposure
-level* describing whether the public key required to spend it has already been published
-on-chain.
-
-This repository contains the draft specification ([`bip-0362.md`](bip-0362.md)), its reference
-implementation, and test vectors. The draft was assigned BIP number 362 in
-[bitcoin/bips#2294](https://github.com/bitcoin/bips/pull/2294), but it is not a ratified
+Reference implementation and test vectors for [BIP 362 version 0.7.0](bip-0362.md), which assigns a Bitcoin
+output one of four exposure levels with respect to an adversary who can compute discrete
+logarithms on secp256k1, for example with a quantum computer. The draft was assigned BIP number
+362 in [bitcoin/bips#2294](https://github.com/bitcoin/bips/pull/2294), but it is not a ratified
 standard.
 
 Discussion is on the [Bitcoin Development Mailing List](https://groups.google.com/g/bitcoindev)
 and [Delving Bitcoin](https://delvingbitcoin.org/t/2866). Corrections and objections are welcome
 as issues here or replies there.
 
-## Why
-
-[BIP 360](https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki) defines the two attacks
-this classification is built on, long exposure and short exposure, and lists which output types
-are vulnerable to the first. BIP 361 proposes a phased sunset of legacy signature verification.
-Between them sits the question tools disagree on: for a given output, what counts as revealed,
-and what to report when the chain cannot be read in full.
-
-The gap is visible in published data. Estimates of the exposed supply range from roughly 25% to
-over 34%. The spread is definitional, not measurement error: implementations disagree on whether
-a Taproot output is exposed at rest, whether a spent-from address that retains a balance differs
-from P2PK, and what to report for a script whose contents have never been revealed.
-
 ## Levels
 
-| Level | Meaning | Action key (Appendix A) |
+See [BIP 362](bip-0362.md) for the full rules.
+
+| Level | When | Action (Appendix A) |
 | --- | --- | --- |
-| `EXPOSED_AT_REST` | The key is on-chain. An adversary can derive it offline and spend at will. | `MIGRATE` |
-| `EXPOSED_ON_SPEND` | The key is not on-chain, but spending will publish it. | `SWEEP_WHEN_SPENDING` |
-| `NOT_EXPOSED` | The output type's consensus rules require a post-quantum signature on every spending path, hybrid schemes included. No deployed type qualifies; P2MR is `EXPOSED_ON_SPEND`. | `NONE` |
-| `UNDETERMINED` | Script semantics unrecognized; no sound statement can be made. | `TREAT_AS_MIGRATE` |
+| `EXPOSED_AT_REST` | Enough valid keys are in the output (see below), a revealed script opens its commitment, or, for P2PKH, P2WPKH and P2SH-P2WPKH outputs, its key has been published on the chain. | `MIGRATE` |
+| `EXPOSED_ON_SPEND` | A P2PKH, P2WPKH, P2SH, P2WSH or active P2MR output meets none of those conditions, checked against every confirmed transaction. Spending it reveals its key or script. | `SWEEP_WHEN_SPENDING` |
+| `NOT_EXPOSED` | The output type requires a post-quantum signature for every spend. No deployed type qualifies. | `NONE` |
+| `UNDETERMINED` | The script is not recognized, it lacks the valid keys required below, or the data needed for another level is missing. | `MIGRATE` |
 
-The action keys are an informative floor requested by wallet developers: wallets own the wording,
-reasons and urgency, but should not contradict the substance.
-
-Two rules distinguish this from an ad-hoc taxonomy:
-
-**Fail-closed.** Where available data cannot distinguish two levels, the level indicating greater
-disclosure is assigned. A classifier that under-reports gives false assurance to someone who may
-act on it; one that over-reports prompts an unnecessary migration. The errors are not symmetric.
-
-**Disclosure mechanism does not change the level.** A reused, spent-from script that retains a
-balance is `EXPOSED_AT_REST`, the same as P2PK — to an adversary they are the same situation.
+P2PK and P2TR require a valid public key. Bare multisig requires valid keys in at least `m`
+of its key positions; `m = 0` needs none. Otherwise these types are `UNDETERMINED`.
+Levels apply only at evaluated blocks where BIP 16, BIP 141 and BIP 341 are active.
+Outputs beginning with `OP_RETURN` and witness version 0 programs of lengths other than 20 or
+32 bytes are not classified (`classify` returns `None`). P2MR is `UNDETERMINED` until BIP 360
+is active. Revealed leaves expose P2MR roots matching their leaf hash or any computed branch
+hash along their Merkle path, but not sibling hashes alone.
 
 ## Usage
 
 ```python
-from exposure_classification import classify, ChainState, Level
+from exposure_classification import ChainEvidence, classify
 
-script = bytes.fromhex("76a914" + "89abcdef" * 5 + "88ac")  # P2PKH
+p2pkh = bytes.fromhex("76a914" + "89abcdef" * 5 + "88ac")
 
-classify(script, ChainState(spent_output_count=0, history_complete=True))
-# Level.EXPOSED_ON_SPEND
+classify(p2pkh, ChainEvidence(own_spend_count=0, complete=True))
+# Level.EXPOSED_ON_SPEND: nothing in the evidence exposes it
 
-classify(script, ChainState(spent_output_count=3, history_complete=True))
-# Level.EXPOSED_AT_REST  — a spend published the key
+classify(p2pkh, ChainEvidence(own_spend_count=3))
+# Level.EXPOSED_AT_REST: a confirmed spend of this script published its key
+
+classify(p2pkh, ChainEvidence(own_spend_count=0))
+# Level.UNDETERMINED: the key may have been published under another script
 ```
 
-The `spent_output_count` field carries an aggregate counter available from most indexers. It
-makes the spend-history check constant-time and, more importantly, keeps a truncated history scan
-from under-reporting: once the count is positive, the outputs are `EXPOSED_AT_REST` whatever the
-scan returned. Matching keys published elsewhere takes time proportional to the number of
-disclosed keys.
+`extract_evidence` collects the published keys, revealed scripts and revealed leaves of one
+confirmed transaction. Pass the activation states of the block containing the spending transaction:
+
+```python
+from exposure_classification import extract_evidence
+
+evidence = extract_evidence(
+    tx, prevout_scripts,
+    bip16_active=spending_block_bip16_active,
+    taproot_active=spending_block_bip341_active,
+    bip360_active=spending_block_bip360_active,
+)
+```
+
+These historical states differ from `ChainEvidence.bip360_active`, which controls P2MR
+classification at the evaluated block. The extractor returns partial evidence with its
+`bip360_active` field set to the supplied spending-block state; set the evaluated-block state
+when combining snapshots. Combining every confirmed transaction in the evaluated block and its
+ancestors, and deciding whether the evidence is complete, is left to the caller. There is no
+BIP 141 switch: blocks before BIP 141 carry no witness data, so nothing is revealed from a
+witness there. Exclude
+unconfirmed transactions and other blocks. A positive `own_spend_count` must count only spends
+in blocks where the output type's consensus rules were active. Extraction does not verify
+signatures or commitments.
 
 ## Running the vectors
 
@@ -73,27 +77,14 @@ disclosed keys.
 python3 exposure_classification.py
 ```
 
-No dependencies beyond the standard library. Vectors are also available as
-[`test_vectors.json`](test_vectors.json) for use by implementations in other languages.
+No dependencies beyond the standard library. The vectors are also in
+[`test_vectors.json`](test_vectors.json) for implementations in other languages.
 
-## Scope
-
-This project classifies. It does not score, rank, or advise. Turning exposure into a risk number
-requires weighing balance, dormancy and CRQC timelines — none observable on-chain, all contested.
-Standardizing the observable while leaving the weighing to implementers is what makes independent
-results comparable.
-
-The reference implementation applies the derived condition to P2PKH and P2WPKH by matching keys
-published elsewhere against the committed key hash. For P2SH, P2WSH and P2MR it would also need
-the committed script (for P2MR, the leaf and its Merkle path), so there it relies only on the
-spent-output count and the script's own history.
-
-Out-of-band disclosure — xpubs shared with service providers, spends of the corresponding output
-on a fork — is outside the classification by construction, since it leaves no evidence on the
-Bitcoin chain. A `NOT_EXPOSED` result asserts what the chain shows, not that no disclosure has
-occurred.
+Extraction vectors are transaction-shaped parser fixtures: their signatures are not valid and
+their Taproot output keys do not commit to their control blocks. They are not valid confirmed
+transactions. Malformed-serialization and invalid-control-block vectors test defensive parsing
+beyond the specification.
 
 ## License
 
-BSD-2-Clause OR CC0-1.0, at your option. The test vectors are additionally placed under CC0-1.0
-so they may be copied into implementations without licensing friction.
+BSD-2-Clause OR CC0-1.0, at your option. The test vectors are additionally placed under CC0-1.0.
