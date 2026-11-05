@@ -1,148 +1,2485 @@
 {
+  "schema_version": 1,
   "_license": "CC0-1.0",
-  "_description": "Test vectors for the Output Public Key Exposure Classification BIP.",
   "script_vectors": [
     {
+      "id": "S01",
+      "description": "P2PK, uncompressed key (genesis coinbase output script)",
       "script_pubkey": "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac",
-      "template": "P2PK",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_AT_REST"
     },
     {
+      "id": "S02",
+      "description": "P2PK, compressed key",
       "script_pubkey": "2102f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9ac",
-      "template": "P2PK",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_AT_REST"
     },
     {
+      "id": "S03",
+      "description": "P2PKH",
       "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
-      "template": "P2PKH",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_ON_SPEND"
     },
     {
+      "id": "S04",
+      "description": "Bare multisig, 1-of-2",
       "script_pubkey": "51210222222222222222222222222222222222222222222222222222222222222222222103333333333333333333333333333333333333333333333333333333333333333352ae",
-      "template": "P2MS-1of2",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_AT_REST"
     },
     {
+      "id": "S05",
+      "description": "P2SH",
       "script_pubkey": "a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba87",
-      "template": "P2SH",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_ON_SPEND"
     },
     {
+      "id": "S06",
+      "description": "P2WPKH (witness version 0, 20-byte program)",
       "script_pubkey": "001489abcdefabbaabbaabbaabbaabbaabbaabbaabba",
-      "template": "P2WPKH",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_ON_SPEND"
     },
     {
+      "id": "S07",
+      "description": "P2WSH (witness version 0, 32-byte program)",
       "script_pubkey": "00201111111111111111111111111111111111111111111111111111111111111111",
-      "template": "P2WSH",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_ON_SPEND"
     },
     {
+      "id": "S08",
+      "description": "P2TR (witness version 1, 32-byte program; output key is the generator's x-coordinate)",
       "script_pubkey": "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
-      "template": "P2TR",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_AT_REST"
     },
     {
-      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
-      "template": "P2MR",
-      "spent_output_count": 0,
-      "history_complete": true,
-      "expected": "EXPOSED_ON_SPEND"
-    },
-    {
-      "script_pubkey": "5210751e76e8199196d454941c45d1b3a323",
-      "template": "witness-v2-16B",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "id": "S09",
+      "description": "Witness version 1, 32-byte program that is not a valid x-coordinate",
+      "script_pubkey": "5120ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "UNDETERMINED"
     },
     {
+      "id": "S10",
+      "description": "Witness version 2, 32-byte program: P2MR where BIP 360 is active",
+      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "S11",
+      "description": "Witness version 2, 32-byte program: P2MR where BIP 360 is active (inactive)",
+      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "S12",
+      "description": "Witness version 1, 2-byte program (pay-to-anchor)",
+      "script_pubkey": "51024e73",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "S13",
+      "description": "Witness version 2, 16-byte program",
+      "script_pubkey": "5210751e76e8199196d454941c45d1b3a323",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "S14",
+      "description": "Witness version 16, 40-byte program",
       "script_pubkey": "60285fbf4c95ba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1cba1c",
-      "template": "witness-v16-40B",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "UNDETERMINED"
     }
   ],
   "history_vectors": [
     {
-      "description": "P2PKH, spent from, balance remains",
-      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
-      "spent_output_count": 3,
-      "history_complete": true,
+      "id": "H01",
+      "description": "P2PKH same script spent",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_AT_REST"
     },
     {
-      "description": "P2WSH, spent from, balance remains",
-      "script_pubkey": "00201111111111111111111111111111111111111111111111111111111111111111",
-      "spent_output_count": 1,
-      "history_complete": true,
+      "id": "H02",
+      "description": "P2PKH key in P2PK output",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_AT_REST"
     },
     {
-      "description": "P2PKH, no spend, history truncated",
-      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
-      "spent_output_count": 0,
-      "history_complete": false,
+      "id": "H03",
+      "description": "P2WPKH x-coordinate in P2TR output",
+      "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "H04",
+      "description": "P2SH-P2WPKH key published by P2WPKH spend",
+      "script_pubkey": "a914bcfeb728b584253d5f3f70bcb780e9ef218a68f487",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "H05",
+      "description": "P2WSH script revealed through P2SH-P2WSH",
+      "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [
+          "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+          "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST",
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "H06",
+      "description": "P2WSH revealed script needs no signature",
+      "script_pubkey": "00204ae81572f06e1b88fd5ced7a1a000945432e83e1551e6f721ee9c00b8cc33260",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [
+          "51"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "H07",
+      "description": "P2WSH 2-of-2 keys published but script hidden",
+      "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_ON_SPEND"
     },
     {
-      "description": "P2PKH, no spend, complete history",
-      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
-      "spent_output_count": 0,
-      "history_complete": true,
+      "id": "H08",
+      "description": "P2PKH no condition holds",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
       "expected": "EXPOSED_ON_SPEND"
     },
     {
-      "description": "P2TR, no transactions at all",
-      "script_pubkey": "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
-      "spent_output_count": 0,
-      "history_complete": true,
-      "expected": "EXPOSED_AT_REST"
-    },
-    {
-      "description": "P2MR, unspent",
-      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
-      "spent_output_count": 0,
-      "history_complete": true,
-      "expected": "EXPOSED_ON_SPEND"
-    },
-    {
-      "description": "P2MR, spent from, balance remains",
-      "script_pubkey": "52201111111111111111111111111111111111111111111111111111111111111111",
-      "spent_output_count": 1,
-      "history_complete": true,
-      "expected": "EXPOSED_AT_REST"
-    },
-    {
-      "description": "P2PKH, no aggregate stats and incomplete history",
-      "script_pubkey": "76a91489abcdefabbaabbaabbaabbaabbaabbaabbaabba88ac",
-      "spent_output_count": null,
-      "history_complete": false,
+      "id": "H09",
+      "description": "P2PKH zero own spends and incomplete evidence",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": false
+      },
       "expected": "UNDETERMINED"
+    },
+    {
+      "id": "H10",
+      "description": "P2PKH positive count without retrieved spends",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": false,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "H11",
+      "description": "P2MR root opened by P2TR leaf path",
+      "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+      "evidence": {
+        "published_keys": [
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": [
+              "7d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe"
+            ]
+          }
+        ],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "H12",
+      "description": "P2MR leaf key published but leaf hidden",
+      "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+      "evidence": {
+        "published_keys": [
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_ON_SPEND"
     }
   ],
+  "classification_vectors": [
+    {
+      "id": "C01",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C02",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C03",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "a914bcfeb728b584253d5f3f70bcb780e9ef218a68f487",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C04",
+      "description": "Accept each published encoding",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C05",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "76a914adde4c73c7b9cee17da6c7b3e2b2eea1a0dcbe6788ac",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C06",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "0014adde4c73c7b9cee17da6c7b3e2b2eea1a0dcbe67",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C07",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "a91448cc1845ab9f5099d4b36f02e148f7459d439fee87",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C08",
+      "description": "Accept each published encoding",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0379be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C09",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "76a91491b24bf9f5288532960ac687abb035127b1d28a588ac",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C10",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "001491b24bf9f5288532960ac687abb035127b1d28a5",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C11",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "a91417743beb429c55c942d2ec703b98c4d57c2df5c687",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C12",
+      "description": "Accept each published encoding",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C13",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "76a914bec08011c9e76dcc42e739a2d7752c2e3ac86e6e88ac",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C14",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "0014bec08011c9e76dcc42e739a2d7752c2e3ac86e6e",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C15",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "a9142cb55bd356acb2192482265f18038bb86293c9e487",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C16",
+      "description": "Accept each published encoding",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798b7c52588d95c3b9aa25b0403f1eef75702e84bb7597aabe663b82f6f04ef2777"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C17",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "76a914b0b678a19d44f26063fcc19d9fd60778a9550edf88ac",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C18",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "0014b0b678a19d44f26063fcc19d9fd60778a9550edf",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C19",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "a91461757aad45eaa2762458210d22316c4b3bf2f11e87",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C20",
+      "description": "Accept each published encoding",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0679be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C21",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "76a914b334a181a0a39e177fa810bf12b36ae2f57aefa688ac",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C22",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "0014b334a181a0a39e177fa810bf12b36ae2f57aefa6",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C23",
+      "description": "Six-encoding expansion from x-only key",
+      "script_pubkey": "a914234378008a88fe1eb7a595e0128ef3e0a3f03d2b87",
+      "evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C24",
+      "description": "Accept each published encoding",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0779be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798b7c52588d95c3b9aa25b0403f1eef75702e84bb7597aabe663b82f6f04ef2777"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C25",
+      "description": "Invalid P2PK key",
+      "script_pubkey": "2102ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C26",
+      "description": "Ignore invalid published key",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C27",
+      "description": "Invalid P2PK key",
+      "script_pubkey": "410479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980000000000000000000000000000000000000000000000000000000000000000ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C28",
+      "description": "Ignore invalid published key",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C29",
+      "description": "Invalid P2PK key",
+      "script_pubkey": "410779be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C30",
+      "description": "Ignore invalid published key",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0779be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C31",
+      "description": "Invalid P2PK key",
+      "script_pubkey": "210579be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C32",
+      "description": "Ignore invalid published key",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0579be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C33",
+      "description": "Invalid P2TR x-coordinate",
+      "script_pubkey": "5120ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C34",
+      "description": "Multisig too few valid keys",
+      "script_pubkey": "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff52ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C35",
+      "description": "Multisig one valid key suffices",
+      "script_pubkey": "51210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff52ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C36",
+      "description": "Multisig counts positions",
+      "script_pubkey": "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179852ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C37",
+      "description": "Multisig m zero with invalid key",
+      "script_pubkey": "002102ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff51ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C38",
+      "description": "Multisig zero of zero",
+      "script_pubkey": "0000ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C39",
+      "description": "Multisig mismatched n",
+      "script_pubkey": "51210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179852ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C40",
+      "description": "Multisig m greater than n",
+      "script_pubkey": "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179851ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C41",
+      "description": "Truncated suffix after P2PK",
+      "script_pubkey": "210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac4cffac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C42",
+      "description": "Non-minimal P2PK push",
+      "script_pubkey": "4c210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C43",
+      "description": "Non-minimal multisig push",
+      "script_pubkey": "514d21000279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179851ae",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C44",
+      "description": "P2A",
+      "script_pubkey": "51024e73",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C45",
+      "description": "OP_RETURN",
+      "script_pubkey": "6a210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": null
+    },
+    {
+      "id": "C46",
+      "description": "Wrong-length witness v0",
+      "script_pubkey": "00021122",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": null
+    },
+    {
+      "id": "C47",
+      "description": "Non-direct witness program push",
+      "script_pubkey": "004c141111111111111111111111111111111111111111",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C48",
+      "description": "Trailing witness byte",
+      "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd600",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C49",
+      "description": "Positive own-spend count with partial evidence",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C50",
+      "description": "Zero count insufficient with partial evidence",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C51",
+      "description": "Unknown count sufficient with complete evidence",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C52",
+      "description": "Positive own-spend count with partial evidence",
+      "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C53",
+      "description": "Zero count insufficient with partial evidence",
+      "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C54",
+      "description": "Unknown count sufficient with complete evidence",
+      "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C55",
+      "description": "Positive own-spend count with partial evidence",
+      "script_pubkey": "a91412fcac201d73f5b5dba0f1f22c40f02da17bb4a487",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C56",
+      "description": "Zero count insufficient with partial evidence",
+      "script_pubkey": "a91412fcac201d73f5b5dba0f1f22c40f02da17bb4a487",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C57",
+      "description": "Unknown count sufficient with complete evidence",
+      "script_pubkey": "a91412fcac201d73f5b5dba0f1f22c40f02da17bb4a487",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C58",
+      "description": "Positive own-spend count with partial evidence",
+      "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C59",
+      "description": "Zero count insufficient with partial evidence",
+      "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C60",
+      "description": "Unknown count sufficient with complete evidence",
+      "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C61",
+      "description": "Positive own-spend count with partial evidence",
+      "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C62",
+      "description": "Zero count insufficient with partial evidence",
+      "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": true
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C63",
+      "description": "Unknown count sufficient with complete evidence",
+      "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": true,
+        "bip360_active": true
+      },
+      "expected": "EXPOSED_ON_SPEND"
+    },
+    {
+      "id": "C64",
+      "description": "Unassigned v2 ignores own spends",
+      "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 1,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "UNDETERMINED"
+    },
+    {
+      "id": "C65",
+      "description": "P2SH direct revealed script",
+      "script_pubkey": "a91412fcac201d73f5b5dba0f1f22c40f02da17bb4a487",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [
+          "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C66",
+      "description": "P2SH nested P2WSH commitment",
+      "script_pubkey": "a91495fba530d7c9dec108765ba657559f2fc3dd263787",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [
+          "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C67",
+      "description": "Leaf bytes open P2SH",
+      "script_pubkey": "a9143dabfbc3ae66590fab984fd996b14172860dc82287",
+      "evidence": {
+        "published_keys": [
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": [
+              "7d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe"
+            ]
+          }
+        ],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C68",
+      "description": "Leaf bytes open nested P2WSH",
+      "script_pubkey": "a914ccc6b298415a544b3463684bcecb026287cc847787",
+      "evidence": {
+        "published_keys": [
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": [
+              "7d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe"
+            ]
+          }
+        ],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C69",
+      "description": "Leaf bytes open P2WSH",
+      "script_pubkey": "0020423b4f95a9d6a0b90a4f5e11172f9b24dafc7a7dfe977d45263238cce0c9355a",
+      "evidence": {
+        "published_keys": [
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": [
+              "7d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe"
+            ]
+          }
+        ],
+        "own_spend_count": 0,
+        "complete": true,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C70",
+      "description": "Partial key evidence establishes exposure",
+      "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+      "evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    },
+    {
+      "id": "C71",
+      "description": "Partial script evidence establishes exposure",
+      "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+      "evidence": {
+        "published_keys": [],
+        "revealed_scripts": [
+          "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": 0,
+        "complete": false,
+        "bip360_active": false
+      },
+      "expected": "EXPOSED_AT_REST"
+    }
+  ],
+  "extraction_vectors": [
+    {
+      "id": "E-a",
+      "description": "P2WPKH spend publishes key",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff000203736967210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "0014751e76e8199196d454941c45d1b3a323f1433bd6"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-b",
+      "description": "P2WSH 2-of-2 reveals script and keys",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff000400047369673104736967324752210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae00000000",
+      "prevout_scripts": [
+        "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [
+          "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-c",
+      "description": "Hash operand is not an x-only key",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff000223a820c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee58721c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "a820c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee587",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "UNDETERMINED"
+        },
+        {
+          "script_pubkey": "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-d",
+      "description": "Tapscript CHECKSIG publishes x-only key",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac21c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-e",
+      "description": "OP_RETURN pushes a published key",
+      "tx": "020000000111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff010000000000000000236a210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "51"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "6a",
+          "expected": null
+        }
+      ]
+    },
+    {
+      "id": "E-f",
+      "description": "Coinbase scriptSig publishes key",
+      "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff22210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff0000000000",
+      "prevout_scripts": [
+        null
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-g",
+      "description": "P2SH-P2WSH reveals both scripts",
+      "tx": "02000000000101111111111111111111111111111111111111111111111111111111111111111100000000232200209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845dbffffffff000300037369674752210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae00000000",
+      "prevout_scripts": [
+        "a91495fba530d7c9dec108765ba657559f2fc3dd263787"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [
+          "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+          "52210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817982102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee552ae"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "a91495fba530d7c9dec108765ba657559f2fc3dd263787",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "00209b984c7bae3efddc3a3f0a20ff81bfe89ed1fe07ff13e562149ee654bed845db",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-h",
+      "description": "Active P2MR depth-zero reveals leaf",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac01c100000000",
+      "prevout_scripts": [
+        "5220ab11b8ce98a88b0dccf33a8144f90266dd8228b9fec6fa0cc0f7d4c0a28b8977"
+      ],
+      "bip360_active": true,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": true
+      },
+      "classifications": [
+        {
+          "script_pubkey": "5220ab11b8ce98a88b0dccf33a8144f90266dd8228b9fec6fa0cc0f7d4c0a28b8977",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-i",
+      "description": "P2TR path opens P2MR root",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac41c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817987d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe00000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": true,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": [
+              "7d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe"
+            ]
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": true
+      },
+      "classifications": [
+        {
+          "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-j",
+      "description": "Intermediate branch matches but siblings do not",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac61c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817987d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe9d7a5cbf4627f6bcaa1e417171cda9c9fafc9a480a1bd9fe346c41047bcc6a0500000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": true,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": [
+              "7d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe",
+              "9d7a5cbf4627f6bcaa1e417171cda9c9fafc9a480a1bd9fe346c41047bcc6a05"
+            ]
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": true
+      },
+      "classifications": [
+        {
+          "script_pubkey": "5220ab11b8ce98a88b0dccf33a8144f90266dd8228b9fec6fa0cc0f7d4c0a28b8977",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "52202f8e41eaf38dc421c416ac21fa4d1400df6022f8d27a3fe933b9a5890429db1a",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "52207d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe",
+          "expected": "UNDETERMINED"
+        },
+        {
+          "script_pubkey": "52209d7a5cbf4627f6bcaa1e417171cda9c9fafc9a480a1bd9fe346c41047bcc6a05",
+          "expected": "UNDETERMINED"
+        }
+      ]
+    },
+    {
+      "id": "E-k",
+      "description": "Annex stripped before path extraction",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00032220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac21c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980650616e6e657800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-l",
+      "description": "Malformed control block skipped",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac22c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980000000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "UNDETERMINED"
+        }
+      ]
+    },
+    {
+      "id": "E-m",
+      "description": "Inactive P2MR does not reveal leaf",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac01c000000000",
+      "prevout_scripts": [
+        "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "UNDETERMINED"
+        }
+      ]
+    },
+    {
+      "id": "E-n",
+      "description": "Unknown leaf version still reveals scripts and SEC keys",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff0002442102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee520c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac21c279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 194,
+            "script": "2102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee520c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-o",
+      "description": "Output key published; nested push data not rescanned",
+      "tx": "020000000111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff020000000000000000225120c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee500000000000000002322210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "51"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "UNDETERMINED"
+        }
+      ]
+    },
+    {
+      "id": "E-p",
+      "description": "Non-minimal pushes decoded until truncated push",
+      "tx": "020000000111111111111111111111111111111111111111111111111111111111111111110000000092004c210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817984d210002c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee54e210000000279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817984cff2102f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9ffffffff0000000000",
+      "prevout_scripts": [
+        "51"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "76a914751e76e8199196d454941c45d1b3a323f1433bd688ac",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "76a91406afd46bcdfd22ef94ac122aa11f241244a37ecc88ac",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-q173",
+      "description": "Non-minimal x-only push before signature opcode",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff0002234c20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ad21c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "4c20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ad",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-q186",
+      "description": "Non-minimal x-only push before signature opcode",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff0002234c20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ba21c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "4c20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ba",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-r",
+      "description": "Unknown leaf version excludes x-only signature operands",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac21c279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 194,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "UNDETERMINED"
+        }
+      ]
+    },
+    {
+      "id": "E-s",
+      "description": "OP_SUCCESS does not stop script decoding",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff000223502102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee521c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "502102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-t",
+      "description": "Mixed legacy and witness inputs",
+      "tx": "0200000000010211111111111111111111111111111111111111111111111111111111111111110000000022210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff11111111111111111111111111111111111111111111111111111111111111110000000000ffffffff010000000000000000236a210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f817980002037369672102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee500000000",
+      "prevout_scripts": [
+        "51",
+        "001406afd46bcdfd22ef94ac122aa11f241244a37ecc"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    },
+    {
+      "id": "E-u",
+      "description": "P2MR control byte with lowest bit clear reveals nothing",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac01c000000000",
+      "prevout_scripts": [
+        "5220ab11b8ce98a88b0dccf33a8144f90266dd8228b9fec6fa0cc0f7d4c0a28b8977"
+      ],
+      "bip360_active": true,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": true
+      },
+      "classifications": [
+        {
+          "script_pubkey": "5220ab11b8ce98a88b0dccf33a8144f90266dd8228b9fec6fa0cc0f7d4c0a28b8977",
+          "expected": "UNDETERMINED"
+        },
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "UNDETERMINED"
+        }
+      ]
+    },
+    {
+      "id": "E-v",
+      "description": "Inactive Taproot does not reveal leaf or internal key",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac21c079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "bip360_active": false,
+      "taproot_active": false,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_ON_SPEND"
+        }
+      ],
+      "classification_complete": true
+    },
+    {
+      "id": "E-w",
+      "description": "Pre-BIP16 P2SH-shaped spend does not reveal discarded script",
+      "tx": "02000000011111111111111111111111111111111111111111111111111111111111111111000000002623210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac7551ffffffff0000000000",
+      "prevout_scripts": [
+        "a914c51b66bced5e4491001bd702669770dccf44098287"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_ON_SPEND"
+        },
+        {
+          "script_pubkey": "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262",
+          "expected": "EXPOSED_ON_SPEND"
+        }
+      ],
+      "classification_complete": true,
+      "bip16_active": false
+    },
+    {
+      "id": "E-w-wsh",
+      "description": "Inactive P2SH excludes nested witness script but scans SEC keys",
+      "tx": "02000000000101111111111111111111111111111111111111111111111111111111111111111100000000452102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee52200201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262ffffffff00022102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee523210279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac00000000",
+      "prevout_scripts": [
+        "a914e4300531190587e3880d4c3004f5355d88ff928d87"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_ON_SPEND"
+        },
+        {
+          "script_pubkey": "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262",
+          "expected": "EXPOSED_ON_SPEND"
+        },
+        {
+          "script_pubkey": "001406afd46bcdfd22ef94ac122aa11f241244a37ecc",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ],
+      "classification_complete": true,
+      "bip16_active": false
+    },
+    {
+      "id": "E-x-wpkh",
+      "description": "Plain P2WPKH witness x-coordinate is not published",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00012079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8179800000000",
+      "prevout_scripts": [
+        "0014751e76e8199196d454941c45d1b3a323f1433bd6"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_ON_SPEND"
+        }
+      ],
+      "classification_complete": true
+    },
+    {
+      "id": "E-x-wsh",
+      "description": "Plain P2WSH witness x-coordinate is not published",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798015100000000",
+      "prevout_scripts": [
+        "00204ae81572f06e1b88fd5ced7a1a000945432e83e1551e6f721ee9c00b8cc33260"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [
+          "51"
+        ],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_ON_SPEND"
+        }
+      ],
+      "classification_complete": true
+    },
+    {
+      "id": "E-x-sig",
+      "description": "scriptSig x-coordinate push is not published",
+      "tx": "0200000001111111111111111111111111111111111111111111111111111111111111111100000000212079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ffffffff0000000000",
+      "prevout_scripts": [
+        "51"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_ON_SPEND"
+        }
+      ],
+      "classification_complete": true
+    },
+    {
+      "id": "E-x-output",
+      "description": "Non-P2TR output x-coordinate push is not published",
+      "tx": "020000000111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff010000000000000000222079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ac00000000",
+      "prevout_scripts": [
+        "51"
+      ],
+      "bip360_active": false,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": false
+      },
+      "classifications": [
+        {
+          "script_pubkey": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+          "expected": "EXPOSED_ON_SPEND"
+        }
+      ],
+      "classification_complete": true
+    },
+    {
+      "id": "E-y",
+      "description": "Active P2MR depth-two path exposes computed hashes only",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff00022220c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac41c17d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe9d7a5cbf4627f6bcaa1e417171cda9c9fafc9a480a1bd9fe346c41047bcc6a0500000000",
+      "prevout_scripts": [
+        "52202f8e41eaf38dc421c416ac21fa4d1400df6022f8d27a3fe933b9a5890429db1a"
+      ],
+      "bip360_active": true,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [
+          "c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+        ],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "20c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5ac",
+            "path": [
+              "7d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe",
+              "9d7a5cbf4627f6bcaa1e417171cda9c9fafc9a480a1bd9fe346c41047bcc6a05"
+            ]
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": true
+      },
+      "classifications": [
+        {
+          "script_pubkey": "5220ab11b8ce98a88b0dccf33a8144f90266dd8228b9fec6fa0cc0f7d4c0a28b8977",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "5220610fac955b8e077f41cf0b1542ab20ca0a5beb2e59abe7defc41d1b1b76a5640",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "52202f8e41eaf38dc421c416ac21fa4d1400df6022f8d27a3fe933b9a5890429db1a",
+          "expected": "EXPOSED_AT_REST"
+        },
+        {
+          "script_pubkey": "52207d10de8554ed5ca40f9d0f0e0f4375b5b338af3fb96d33c9b2f53b5289b8f4fe",
+          "expected": "EXPOSED_ON_SPEND"
+        },
+        {
+          "script_pubkey": "52209d7a5cbf4627f6bcaa1e417171cda9c9fafc9a480a1bd9fe346c41047bcc6a05",
+          "expected": "EXPOSED_ON_SPEND"
+        }
+      ],
+      "classification_complete": true
+    },
+    {
+      "id": "E-z",
+      "description": "253-byte leaf uses CompactSize fd fd 00",
+      "tx": "0200000000010111111111111111111111111111111111111111111111111111111111111111110000000000ffffffff0002fdfd006161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161615101c100000000",
+      "prevout_scripts": [
+        "522081b9997148ec31ee086c9ab98247787b46490839ca993367c18414b061703a94"
+      ],
+      "bip360_active": true,
+      "taproot_active": true,
+      "expected_evidence": {
+        "published_keys": [],
+        "revealed_scripts": [],
+        "revealed_leaves": [
+          {
+            "version": 192,
+            "script": "61616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616151",
+            "path": []
+          }
+        ],
+        "own_spend_count": null,
+        "complete": false,
+        "bip360_active": true
+      },
+      "classifications": [
+        {
+          "script_pubkey": "522081b9997148ec31ee086c9ab98247787b46490839ca993367c18414b061703a94",
+          "expected": "EXPOSED_AT_REST"
+        }
+      ]
+    }
+  ],
+  "extraction_notes": [
+    "Extraction vectors are transaction-shaped parser fixtures, not valid confirmed transactions: signatures are not valid and Taproot output keys do not commit to their control blocks.",
+    "Malformed-serialization and invalid-control-block vectors test defensive parsing beyond the specification."
+  ],
   "appendix_a_actions": {
-    "_note": "Informative. Fixed action key per level; wallets own wording above this floor.",
     "EXPOSED_AT_REST": "MIGRATE",
     "EXPOSED_ON_SPEND": "SWEEP_WHEN_SPENDING",
     "NOT_EXPOSED": "NONE",
-    "UNDETERMINED": "TREAT_AS_MIGRATE"
+    "UNDETERMINED": "MIGRATE"
   }
 }
